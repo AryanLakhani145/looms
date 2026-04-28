@@ -231,6 +231,79 @@ select.fi{cursor:pointer}
 td .panna-sel{font-family:'IBM Plex Mono';font-size:11px;background:transparent;border:1px solid transparent;color:var(--text3);border-radius:3px;padding:2px 4px;cursor:pointer;width:40px}
 td .panna-sel:focus{outline:none;border-color:var(--gold);color:var(--text)}
 [data-theme=light] td .panna-sel{background:transparent}
+
+/* ═══════════════════════════════════════
+   MOBILE — everything under 768px
+═══════════════════════════════════════ */
+@media(max-width:768px){
+
+  /* Header — hide backup/restore, shrink */
+  .hdr{padding:0 12px;height:48px}
+  .brand-k{font-size:18px;letter-spacing:2px}
+  .date-pill{display:none}
+  #syncBadge{display:none !important}
+  /* hide backup/restore on mobile, keep theme toggle */
+  .hdr-r .btn:nth-child(3),
+  .hdr-r .btn:nth-child(4){display:none}
+
+  /* Panels */
+  .panel{padding:12px}
+
+  /* Cards — 2 columns */
+  .cards{grid-template-columns:1fr 1fr}
+  .c-val{font-size:18px}
+  .c-val.sm{font-size:15px}
+
+  /* Tables — horizontal scroll with touch */
+  .tbox{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{font-size:11px}
+  th,td{padding:6px 8px}
+
+  /* Section headers wrap nicely */
+  .sec-hdr{gap:6px}
+  .row-actions{flex-wrap:wrap;gap:4px}
+  .row-actions .btn{font-size:10px;padding:5px 9px}
+
+  /* Loom tracker — freeze first 2 cols */
+  #loom-content .tbox{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+  /* Dashboard grid — stack vertically */
+  #dash-content .grid-2,
+  #dash-content [style*="grid-template-columns:3fr"],
+  #dash-content [style*="grid-template-columns:2fr"]{
+    display:block !important
+  }
+  #dash-content [style*="grid-template-columns:3fr"] > div,
+  #dash-content [style*="grid-template-columns:2fr"] > div{
+    margin-bottom:16px
+  }
+
+  /* Modals */
+  .modal{max-height:95vh;border-radius:10px 10px 0 0;margin-top:auto}
+  .overlay{align-items:flex-end;padding:0}
+  .mbody{padding:14px}
+  .mhd{padding:14px 16px}
+  .mfoot{padding:10px 16px}
+  .form-grid{grid-template-columns:1fr !important}
+
+  /* Recipe cards */
+  .rc-grid{grid-template-columns:1fr}
+  .cl-grid{grid-template-columns:1fr}
+
+  /* Loom date bar */
+  #panel-looms [style*="Entry Date"]{flex-wrap:wrap}
+
+  /* Hide less critical columns in loom table on very small screens */
+  /* Keep: M/C, Beam, Quality, Op Bal, MC Bal, Day, Night, Closing, B/F */
+}
+
+@media(max-width:480px){
+  .cards{grid-template-columns:1fr 1fr}
+  .c-val{font-size:16px}
+  .brand-k{font-size:16px}
+  /* Tab text smaller */
+  .tab{padding:8px 10px;font-size:9px;letter-spacing:.5px}
+}
 </style>
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -942,8 +1015,78 @@ function renderLooms() {
     </tr>`;
   }).join('');
 
+  // Mobile card view
+  const isMobile = window.innerWidth <= 768;
+  const mobileCards = sorted.map(l => {
+    const c = calcLoom(l);
+    const isJW = l.workType === 'jw';
+    const bfCls = c.bfDays > 0 && c.bfDays <= 10 ? 'b-red' : c.bfDays <= 20 ? 'b-amber' : 'b-green';
+    const diffCls = Math.abs(c.diff) > 20 ? 'diff-bad' : Math.abs(c.diff) > 8 ? 'diff-warn' : 'diff-ok';
+    return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px;position:relative">
+      <!-- card header -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div>
+          <span style="font-family:'IBM Plex Mono';font-size:13px;font-weight:500;color:var(--text)">M/C ${l.machNo}</span>
+          <span style="font-family:'IBM Plex Mono';font-size:11px;color:var(--text3);margin-left:6px">${l.beamNo||'—'}</span>
+          <br>
+          <span class="badge b-gold" style="font-size:9px;margin-top:4px">${l.quality||'—'}</span>
+          <span class="badge ${isJW?'b-jw':'b-own'}" style="font-size:9px;margin-left:4px">${isJW?(getClientName(l.client)||'JW'):'Own'}</span>
+          ${c.bfDays>0?`<span class="badge ${bfCls}" style="font-size:9px;margin-left:4px">${c.bfDays.toFixed(1)}d</span>`:''}
+        </div>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-outline btn-sm btn-ico" onclick="openLoomModal('${l.id}')">✏</button>
+          <button class="btn btn-red btn-sm btn-ico" onclick="delLoom('${l.id}')">✕</button>
+        </div>
+      </div>
+      <!-- editable fields row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div>
+          <div style="font-family:'IBM Plex Mono';font-size:9px;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px">Op Balance</div>
+          <input class="ci" type="number" value="${l.opBal||0}" onchange="patch('${l.id}','opBal',this.value)" style="width:100%;text-align:left;font-size:13px;padding:6px 8px;border:1px solid var(--border2);border-radius:4px">
+        </div>
+        <div>
+          <div style="font-family:'IBM Plex Mono';font-size:9px;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px">MC Balance</div>
+          <input class="ci" type="number" value="${l.mcBal||0}" onchange="patch('${l.id}','mcBal',this.value)" style="width:100%;text-align:left;font-size:13px;padding:6px 8px;border:1px solid var(--border2);border-radius:4px">
+        </div>
+        <div>
+          <div style="font-family:'IBM Plex Mono';font-size:9px;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px">Day Prod</div>
+          <input class="ci" type="number" value="${l.dayProd||0}" onchange="patch('${l.id}','dayProd',this.value)" style="width:100%;text-align:left;font-size:13px;padding:6px 8px;border:1px solid var(--border2);border-radius:4px">
+        </div>
+        <div>
+          <div style="font-family:'IBM Plex Mono';font-size:9px;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px">Night Prod</div>
+          <input class="ci" type="number" value="${l.nightProd||0}" onchange="patch('${l.id}','nightProd',this.value)" style="width:100%;text-align:left;font-size:13px;padding:6px 8px;border:1px solid var(--border2);border-radius:4px">
+        </div>
+      </div>
+      <!-- calculated row -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding-top:8px;border-top:1px solid var(--border)">
+        <div style="text-align:center">
+          <div style="font-family:'IBM Plex Mono';font-size:9px;color:var(--text3);letter-spacing:.6px;text-transform:uppercase">DIFF</div>
+          <div class="text-mono ${diffCls}" style="font-size:13px;font-weight:500">${c.diff>0?'+':''}${fiI(c.diff)}</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-family:'IBM Plex Mono';font-size:9px;color:var(--text3);letter-spacing:.6px;text-transform:uppercase">Closing</div>
+          <div class="text-mono" style="font-size:13px;font-weight:600;color:var(--gold)">${fiI(c.closing)}</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-family:'IBM Plex Mono';font-size:9px;color:var(--text3);letter-spacing:.6px;text-transform:uppercase">WA KGS</div>
+          <div class="text-mono" style="font-size:12px;color:var(--gold)">${fi(c.waKgs)}</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-family:'IBM Plex Mono';font-size:9px;color:var(--text3);letter-spacing:.6px;text-transform:uppercase">W1 Cons</div>
+          <div class="text-mono" style="font-size:12px;color:var(--gold)">${c.w1Cons?fi(c.w1Cons,2):'—'}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
   el.innerHTML = `
     ${rollInfo}
+    ${isMobile ? `
+      <div id="loom-cards">${mobileCards}</div>
+      <div style="padding:10px 0;text-align:center">
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('loom-table-view').style.display='block';this.style.display='none'">Show Full Table ▸</button>
+      </div>
+      <div id="loom-table-view" style="display:none">` : ''}
     <div class="tbox">
       <table>
         <thead><tr>
@@ -969,6 +1112,7 @@ function renderLooms() {
         </tr></tfoot>
       </table>
     </div>
+    ${isMobile ? '</div>' : ''}
     <div style="margin-top:10px;font-size:11px;color:var(--text3);font-family:'IBM Plex Mono'">
       DIFF = MC Balance − Opening Balance · Closing = MC Balance − Day − Night · B/F Days = MC Balance ÷ (Day+Night)
     </div>`;
