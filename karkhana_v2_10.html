@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Karkhana — Nakshatra Creations Pvt. Ltd.</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────
+   TOKENS
+───────────────────────────────────── */
+:root {
+  --gold: #c9a84c;
+  --gold-dim: #8a6f2e;
+  --gold-glow: #e8c96a;
+  --gold-bg: rgba(201,168,76,.08);
+  --gold-border: rgba(201,168,76,.22);
+  --red: #9b1c1c;
+  --red-mid: #c0392b;
+  --red-bright: #e84c3d;
+  --red-bg: rgba(155,28,28,.12);
+  --red-border: rgba(200,57,43,.28);
+  --green: #2e7d5a;
+  --green-bright: #48c98a;
+  --green-bg: rgba(72,201,138,.09);
+  --green-border: rgba(72,201,138,.22);
+  --amber: #b87d18;
+  --amber-bright: #f5a623;
+  --amber-bg: rgba(245,166,35,.1);
+}
+[data-theme=dark]{
+  --bg: #0c0c0c; --bg2: #131313; --bg3: #1c1c1c; --bg4: #252525;
+  --border: #252525; --border2: #303030; --border3: #3a3a3a;
+  --text: #ede8e0; --text2: #a09890; --text3: #5a5550;
+  --input: #181818; --hover: rgba(201,168,76,.05);
+  --thead: #0a0a0a; --shadow: 0 2px 20px rgba(0,0,0,.7);
+  --modal-bg: #141414;
+}
+[data-theme=light]{
+  --bg: #f4f0e8; --bg2: #fff; --bg3: #ece7dc; --bg4: #e2ddd2;
+  --border: #ddd8ce; --border2: #ccc8be; --border3: #bbb6ae;
+  --text: #1a1410; --text2: #5a5248; --text3: #958e84;
+  --input: #fff; --hover: rgba(201,168,76,.07);
+  --thead: #1a1410; --shadow: 0 2px 12px rgba(0,0,0,.1);
+  --modal-bg: #fff;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'IBM Plex Sans',sans-serif;font-size:13px;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border3);border-radius:2px}
+
+/* ─────────────────────────────────────
+   SHELL
+───────────────────────────────────── */
+.app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+/* HEADER */
+.hdr{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0;position:relative;z-index:20}
+.hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--red) 0%,var(--gold) 40%,var(--gold) 60%,var(--red) 100%)}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand-k{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;letter-spacing:3px;color:var(--gold)}
+.brand-s{font-size:10px;font-weight:300;color:var(--text3);letter-spacing:1.5px;font-family:'IBM Plex Mono'}
+@media(max-width:540px){.brand-s{display:none}}
+.hdr-r{display:flex;align-items:center;gap:6px}
+.date-pill{font-family:'IBM Plex Mono';font-size:10px;color:var(--text3);padding:3px 8px;border:1px solid var(--border2);border-radius:20px;white-space:nowrap}
+
+/* TABS */
+.tabs-bar{background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.tabs-bar::-webkit-scrollbar{display:none}
+.tabs{display:flex;padding:0 6px}
+.tab{padding:10px 15px;font-family:'IBM Plex Mono';font-size:10px;letter-spacing:.9px;text-transform:uppercase;color:var(--text3);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s;display:flex;align-items:center;gap:5px}
+.tab:hover{color:var(--text2)}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+
+/* PANELS */
+.main{flex:1;overflow:hidden;position:relative}
+.panel{position:absolute;inset:0;overflow-y:auto;padding:18px;display:none}
+.panel.active{display:block}
+
+/* ─────────────────────────────────────
+   TYPOGRAPHY & LAYOUT HELPERS
+───────────────────────────────────── */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;color:var(--text)}
+.sec-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.row-actions{display:flex;gap:5px;align-items:center}
+.mb8{margin-bottom:8px}
+.mb12{margin-bottom:12px}
+.mb16{margin-bottom:16px}
+.mb20{margin-bottom:20px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+@media(max-width:640px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+/* ─────────────────────────────────────
+   BUTTONS
+───────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:5px;font-size:11px;font-weight:500;cursor:pointer;border:none;font-family:'IBM Plex Sans';transition:all .15s;white-space:nowrap;letter-spacing:.2px}
+.btn-gold{background:var(--gold);color:#0a0a0a;font-weight:600}
+.btn-gold:hover{background:var(--gold-glow)}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.btn-red{background:var(--red-bg);color:var(--red-bright);border:1px solid var(--red-border)}
+.btn-red:hover{background:rgba(200,57,43,.2)}
+.btn-amber{background:var(--amber-bg);color:var(--amber-bright);border:1px solid rgba(245,166,35,.3)}
+.btn-sm{padding:4px 9px;font-size:10px}
+.btn-ico{width:26px;height:26px;padding:0;justify-content:center;border-radius:50%;font-size:12px}
+
+/* ─────────────────────────────────────
+   STAT CARDS
+───────────────────────────────────── */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px;margin-bottom:16px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.card.gold::before{background:linear-gradient(90deg,var(--gold-dim),var(--gold-glow))}
+.card.red::before{background:linear-gradient(90deg,var(--red),var(--red-bright))}
+.card.green::before{background:linear-gradient(90deg,var(--green),var(--green-bright))}
+.card.amber::before{background:linear-gradient(90deg,var(--amber),var(--amber-bright))}
+.card.plain::before{background:var(--border2)}
+.c-label{font-family:'IBM Plex Mono';font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
+.c-val{font-family:'IBM Plex Mono';font-size:22px;font-weight:500;color:var(--text);line-height:1}
+.c-val.sm{font-size:17px}
+.c-sub{font-size:10px;color:var(--text3);margin-top:4px}
+
+/* ─────────────────────────────────────
+   TABLES
+───────────────────────────────────── */
+.tbox{background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:auto;box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead{position:sticky;top:0;z-index:4}
+th{background:var(--thead);color:var(--text3);font-family:'IBM Plex Mono';font-size:9px;font-weight:400;letter-spacing:.9px;text-transform:uppercase;padding:9px 10px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--border2)}
+th.r{text-align:right}
+td{padding:7px 10px;border-bottom:1px solid var(--border);white-space:nowrap;font-family:'IBM Plex Mono';vertical-align:middle;color:var(--text)}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--hover)}
+td.r{text-align:right}
+td.gold{color:var(--gold);font-weight:500}
+td.red{color:var(--red-bright)}
+td.green{color:var(--green-bright)}
+td.amber{color:var(--amber-bright)}
+td.dim{color:var(--text3)}
+td.strong{font-weight:600}
+tfoot td{background:var(--bg3);font-weight:600;color:var(--text);border-top:1px solid var(--border2)}
+
+/* INLINE INPUTS */
+.ci{width:82px;padding:4px 6px;border:1px solid transparent;border-radius:4px;font-family:'IBM Plex Mono';font-size:11px;background:transparent;color:var(--text);text-align:right;transition:all .15s}
+.ci:focus{outline:none;border-color:var(--gold);background:var(--gold-bg)}
+.ci.wide{width:120px;text-align:left}
+
+/* ─────────────────────────────────────
+   STATUS BADGES
+───────────────────────────────────── */
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:9px;font-weight:500;font-family:'IBM Plex Mono';letter-spacing:.4px;white-space:nowrap}
+.b-gold{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-border)}
+.b-red{background:var(--red-bg);color:var(--red-bright);border:1px solid var(--red-border)}
+.b-green{background:var(--green-bg);color:var(--green-bright);border:1px solid var(--green-border)}
+.b-amber{background:var(--amber-bg);color:var(--amber-bright);border:1px solid rgba(245,166,35,.3)}
+.b-dim{background:var(--bg3);color:var(--text3);border:1px solid var(--border2)}
+.b-own{background:var(--green-bg);color:var(--green-bright);border:1px solid var(--green-border)}
+.b-jw{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-border)}
+
+/* BEAM FALL ROW COLOURS */
+tr.bf-crit td{background:rgba(155,28,28,.06) !important}
+tr.bf-warn td{background:rgba(245,166,35,.05) !important}
+
+/* ─────────────────────────────────────
+   FORMS
+───────────────────────────────────── */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:11px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg.full{grid-column:1/-1}
+.fg.half{grid-column:span 1}
+label.lbl{font-family:'IBM Plex Mono';font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text3)}
+.fi{padding:8px 10px;border:1px solid var(--border2);border-radius:5px;font-family:'IBM Plex Mono';font-size:12px;background:var(--input);color:var(--text);transition:border-color .15s}
+.fi:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-bg)}
+select.fi{cursor:pointer}
+.fi[readonly]{opacity:.55;cursor:default}
+.fi.computed{color:var(--gold);opacity:.9}
+
+/* ─────────────────────────────────────
+   MODAL
+───────────────────────────────────── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)}
+.overlay.open{display:flex}
+.modal{background:var(--modal-bg);border:1px solid var(--border2);border-radius:10px;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow)}
+.mhd{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.mtitle{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;color:var(--text)}
+.mbody{padding:20px}
+.mfoot{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.xbtn{width:28px;height:28px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px}
+.xbtn:hover{border-color:var(--red-bright);color:var(--red-bright)}
+
+/* ─────────────────────────────────────
+   MISC
+───────────────────────────────────── */
+.divlabel{display:flex;align-items:center;gap:8px;margin:14px 0}
+.divlabel::before,.divlabel::after{content:'';flex:1;height:1px;background:var(--border)}
+.divlabel span{font-family:'IBM Plex Mono';font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);white-space:nowrap}
+.alert{padding:9px 13px;border-radius:5px;font-size:11px;line-height:1.6;margin-bottom:12px}
+.alert-gold{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-border)}
+.alert-red{background:var(--red-bg);color:var(--red-bright);border:1px solid var(--red-border)}
+.alert-dim{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.empty{text-align:center;padding:56px 24px;color:var(--text3)}
+.empty-ico{font-size:36px;margin-bottom:10px;opacity:.4}
+.empty p{font-size:13px;line-height:1.8}
+.rc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:10px}
+.rc-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px;position:relative}
+.rc-card:hover{border-color:var(--border2)}
+.rc-name{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:600;color:var(--text);margin-bottom:2px}
+.rc-sku{font-family:'IBM Plex Mono';font-size:10px;color:var(--gold);margin-bottom:8px}
+.rc-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);font-size:11px}
+.rc-row:last-child{border-bottom:none}
+.rc-k{color:var(--text3)}
+.rc-v{color:var(--text);font-weight:500}
+.rc-actions{position:absolute;top:10px;right:10px;display:flex;gap:3px}
+.cl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.cl-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px}
+.cl-name{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px}
+.cl-row{display:flex;justify-content:space-between;font-size:11px;padding:3px 0}
+.cl-key{color:var(--text3)}
+.cl-val{color:var(--text);font-family:'IBM Plex Mono'}
+/* rollover notice */
+.rollover-bar{background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:7px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap}
+.rollover-text{font-size:12px;color:var(--gold)}
+/* diff indicator */
+.diff-ok{color:var(--green-bright)}
+.diff-warn{color:var(--amber-bright)}
+.diff-bad{color:var(--red-bright);font-weight:600}
+/* panna cell */
+td .panna-sel{font-family:'IBM Plex Mono';font-size:11px;background:transparent;border:1px solid transparent;color:var(--text3);border-radius:3px;padding:2px 4px;cursor:pointer;width:40px}
+td .panna-sel:focus{outline:none;border-color:var(--gold);color:var(--text)}
+[data-theme=light] td .panna-sel{background:transparent}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="app">
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="brand">
+    <span class="brand-k">KARKHANA</span>
+    <span class="brand-s">Nakshatra Creations Pvt. Ltd.</span>
+  </div>
+  <div class="hdr-r">
+    <span class="date-pill" id="dateDisplay"></span>
+    <span id="syncBadge" style="font-family:'IBM Plex Mono';font-size:9px;padding:3px 8px;border-radius:20px;border:1px solid var(--border2);color:var(--text3);letter-spacing:.5px;display:none"></span>
+    <button class="btn btn-outline btn-sm" onclick="toggleTheme()" id="themeBtn">☀</button>
+    <button class="btn btn-outline btn-sm" onclick="doExport()">↓ Backup</button>
+    <button class="btn btn-outline btn-sm" onclick="document.getElementById('importFile').click()">↑ Restore</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="doImport(event)">
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="tabs-bar">
+  <div class="tabs" id="tabRow">
+    <div class="tab active" data-tab="dash">◈ Dashboard</div>
+    <div class="tab" data-tab="looms">⊞ Loom Tracker</div>
+    <div class="tab" data-tab="beams">▣ Beam Stock</div>
+    <div class="tab" data-tab="yarn">⬡ Weft Yarn</div>
+    <div class="tab" data-tab="clients">◉ Clients</div>
+    <div class="tab" data-tab="recipes">≡ Recipe Master</div>
+    <div class="tab" data-tab="pipes">○ Pipes</div>
+  </div>
+</div>
+
+<!-- PANELS -->
+<div class="main">
+
+  <!-- DASHBOARD -->
+  <div id="panel-dash" class="panel active"><div id="dash-content"></div></div>
+
+  <!-- LOOM TRACKER -->
+  <div id="panel-looms" class="panel">
+    <div class="sec-hdr">
+      <div>
+        <div class="sec-title">Loom Tracker</div>
+        <div class="sec-sub">Update MC Balance, Day Prod, Night Prod each morning from floor readings</div>
+      </div>
+      <div class="row-actions">
+        <span style="font-family:'IBM Plex Mono';font-size:9px;color:var(--text3);letter-spacing:.5px">SORT</span>
+        <select class="fi btn-sm" id="loomSort" onchange="renderLooms()" style="padding:4px 8px;width:auto;font-size:10px;border-color:var(--border2)">
+          <option value="machNo">M/C No.</option>
+          <option value="quality">Quality</option>
+          <option value="party">Party</option>
+          <option value="bfDays">Beam Fall ↑</option>
+          <option value="closing">Closing ↓</option>
+        </select>
+        <button class="btn btn-outline" onclick="openHistory()" style="font-size:10px">📋 History</button>
+        <button class="btn btn-amber" onclick="rollToNextDay()" title="Carry closing balance forward as opening balance and reset production">↺ Roll to Next Day</button>
+        <button class="btn btn-gold" onclick="openLoomModal(null)">+ Add Machine</button>
+      </div>
+    </div>
+    <div id="loom-content"></div>
+  </div>
+
+  <!-- BEAM STOCK -->
+  <div id="panel-beams" class="panel">
+    <div class="sec-hdr">
+      <div class="sec-title">Stock Beam Inventory</div>
+      <div><button class="btn btn-gold" onclick="openBeamModal(null)">+ Add Beam</button></div>
+    </div>
+    <div id="beam-content"></div>
+  </div>
+
+  <!-- WEFT YARN -->
+  <div id="panel-yarn" class="panel">
+    <div class="sec-hdr">
+      <div class="sec-title">Weft Yarn Stock</div>
+      <div><button class="btn btn-gold" onclick="openYarnModal(null)">+ Add Entry</button></div>
+    </div>
+    <div id="yarn-content"></div>
+  </div>
+
+  <!-- CLIENTS -->
+  <div id="panel-clients" class="panel">
+    <div class="sec-hdr">
+      <div class="sec-title">Clients</div>
+      <div><button class="btn btn-gold" onclick="openClientModal(null)">+ Add Client</button></div>
+    </div>
+    <div class="alert alert-gold mb12">Assign clients to machines in the Loom Tracker. Job Work clients = external parties who send beams to weave on your machines.</div>
+    <div id="client-content"></div>
+  </div>
+
+  <!-- RECIPE MASTER -->
+  <div id="panel-recipes" class="panel">
+    <div class="sec-hdr">
+      <div class="sec-title">Recipe Master</div>
+      <div><button class="btn btn-gold" onclick="openRecipeModal(null)">+ Add Quality</button></div>
+    </div>
+    <div class="alert alert-dim mb12"><strong>W_Weight (g/m) = Reed Space × Denier × PPI / 90,000</strong> &nbsp;·&nbsp; Weft Consumption = Closing × Panna × W_Weight / 100</div>
+    <div id="recipe-content"></div>
+  </div>
+
+  <!-- PIPES -->
+  <div id="panel-pipes" class="panel">
+    <div class="sec-hdr">
+      <div class="sec-title">Pipe Tracker</div>
+      <div><button class="btn btn-gold" onclick="openPipeModal(null)">+ Add Party</button></div>
+    </div>
+    <div id="pipe-content"></div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ════════════════ MODALS ════════════════ -->
+
+<!-- LOOM -->
+<div id="loomModal" class="overlay" onclick="bgClose(event,'loomModal')">
+<div class="modal">
+  <div class="mhd"><div class="mtitle" id="lm-title">Add Machine</div><button class="xbtn" onclick="closeModal('loomModal')">✕</button></div>
+  <div class="mbody">
+    <input type="hidden" id="lm-id">
+    <div class="form-grid">
+      <div class="fg"><label class="lbl">M/C No. *</label><input class="fi" id="lm-machNo" type="number" placeholder="1"></div>
+      <div class="fg"><label class="lbl">Beam No. *</label><input class="fi" id="lm-beamNo" placeholder="SK-818"></div>
+      <div class="fg"><label class="lbl">Quality *</label>
+        <select class="fi" id="lm-quality" onchange="lmRecipeFill()"><option value="">— Select —</option></select>
+      </div>
+      <div class="fg"><label class="lbl">Panna (width)</label>
+        <select class="fi" id="lm-panna">
+          <option value="2">Double Panna (×2) — default</option>
+          <option value="1">Single Panna (×1)</option>
+        </select>
+      </div>
+      <div class="fg"><label class="lbl">Production Type</label>
+        <select class="fi" id="lm-wtype" onchange="lmTypeToggle()">
+          <option value="own">Own Production</option>
+          <option value="jw">Job Work</option>
+        </select>
+      </div>
+      <div class="fg" id="lm-clientWrap" style="display:none"><label class="lbl">Client *</label>
+        <select class="fi" id="lm-client"><option value="">— Select Client —</option></select>
+      </div>
+      <div class="fg"><label class="lbl">Party (Beam Owner)</label>
+        <input class="fi" id="lm-party" placeholder="Type or select..." list="lm-party-list" autocomplete="off">
+        <datalist id="lm-party-list"></datalist>
+      </div>
+      <div class="fg"><label class="lbl">Warp Yarn</label><input class="fi" id="lm-warpYarn" placeholder="auto from recipe"></div>
+      <div class="fg"><label class="lbl">Ends</label><input class="fi" id="lm-ends" type="number" placeholder="7100"></div>
+      <div class="fg"><label class="lbl">Denier</label><input class="fi" id="lm-denier" type="number" placeholder="100"></div>
+    </div>
+    <!-- RECIPE PREVIEW — appears when quality is selected -->
+    <div id="lm-rp" style="display:none;background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:5px;padding:10px 12px;margin-top:10px">
+      <div style="font-family:'IBM Plex Mono';font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:7px">Recipe loaded ✓</div>
+      <div id="lm-rp-body" style="display:grid;grid-template-columns:auto 1fr auto 1fr;gap:4px 14px;font-family:'IBM Plex Mono';font-size:11px"></div>
+    </div>
+    <div class="divlabel"><span>Balance &amp; Production</span></div>
+    <div class="form-grid">
+      <div class="fg"><label class="lbl">WA Opening Balance (m)</label><input class="fi" id="lm-opBal" type="number" placeholder="0"></div>
+      <div class="fg"><label class="lbl">WA M/C Balance (m) — from floor</label><input class="fi" id="lm-mcBal" type="number" placeholder="0"></div>
+      <div class="fg"><label class="lbl">Day Production (m)</label><input class="fi" id="lm-dayProd" type="number" placeholder="0"></div>
+      <div class="fg"><label class="lbl">Night Production (m)</label><input class="fi" id="lm-nightProd" type="number" placeholder="0"></div>
+      <div class="fg"><label class="lbl">Rate ₹/m</label><input class="fi" id="lm-price" type="number" step="0.01" placeholder="0"></div>
+      <div class="fg"><label class="lbl">Entry Date</label><input class="fi" id="lm-date" type="date"></div>
+    </div>
+  </div>
+  <div class="mfoot">
+    <button class="btn btn-outline" onclick="closeModal('loomModal')">Cancel</button>
+    <button class="btn btn-gold" onclick="saveLoom()">Save Machine</button>
+  </div>
+</div>
+</div>
+
+<!-- BEAM -->
+<div id="beamModal" class="overlay" onclick="bgClose(event,'beamModal')">
+<div class="modal">
+  <div class="mhd"><div class="mtitle" id="bm-title">Add Stock Beam</div><button class="xbtn" onclick="closeModal('beamModal')">✕</button></div>
+  <div class="mbody">
+    <input type="hidden" id="bm-id">
+    <div class="form-grid">
+      <div class="fg"><label class="lbl">Beam No.</label><input class="fi" id="bm-beamNo" placeholder="A-2191"></div>
+      <div class="fg"><label class="lbl">Quality</label><input class="fi" id="bm-quality" placeholder="MAL_CHANDERI_6.5 or type new" list="bm-quality-list" autocomplete="off"><datalist id="bm-quality-list"></datalist></div>
+      <div class="fg"><label class="lbl">Party</label><input class="fi" id="bm-party" placeholder="Nakkashi" list="bm-party-list" autocomplete="off"><datalist id="bm-party-list"></datalist></div>
+      <div class="fg"><label class="lbl">Yarn Type</label><input class="fi" id="bm-yarn" placeholder="60/8"></div>
+      <div class="fg"><label class="lbl">Width (cm)</label>
+        <select class="fi" id="bm-width"><option value="230">230 cm</option><option value="280">280 cm</option><option value="other">Other</option></select>
+      </div>
+      <div class="fg"><label class="lbl">Ends</label><input class="fi" id="bm-ends" type="number" placeholder="8800"></div>
+      <div class="fg"><label class="lbl">Denier</label><input class="fi" id="bm-denier" type="number" placeholder="60"></div>
+      <div class="fg"><label class="lbl">Meters</label><input class="fi" id="bm-meters" type="number" placeholder="5938"></div>
+      <div class="fg"><label class="lbl">Rate ₹/kg</label><input class="fi" id="bm-rate" type="number" step="0.01" placeholder="0"></div>
+      <div class="fg"><label class="lbl">Entry Date</label><input class="fi" id="bm-date" type="date"></div>
+    </div>
+  </div>
+  <div class="mfoot">
+    <button class="btn btn-outline" onclick="closeModal('beamModal')">Cancel</button>
+    <button class="btn btn-gold" onclick="saveBeam()">Save Beam</button>
+  </div>
+</div>
+</div>
+
+<!-- YARN -->
+<div id="yarnModal" class="overlay" onclick="bgClose(event,'yarnModal')">
+<div class="modal">
+  <div class="mhd"><div class="mtitle" id="ym-title">Add Yarn Entry</div><button class="xbtn" onclick="closeModal('yarnModal')">✕</button></div>
+  <div class="mbody">
+    <input type="hidden" id="ym-id">
+    <div class="form-grid">
+      <div class="fg"><label class="lbl">Yarn Quality *</label><input class="fi" id="ym-quality" placeholder="120/30"></div>
+      <div class="fg"><label class="lbl">Party / Supplier *</label><input class="fi" id="ym-party" placeholder="Nakkashi" list="ym-party-list" autocomplete="off"><datalist id="ym-party-list"></datalist></div>
+      <div class="fg"><label class="lbl">Opening Balance (kg)</label><input class="fi" id="ym-opBal" type="number" step="0.001" placeholder="0"></div>
+      <div class="fg"><label class="lbl">Purchase (kg)</label><input class="fi" id="ym-purchase" type="number" step="0.001" placeholder="0"></div>
+      <div class="fg"><label class="lbl">Issue / Used (kg)</label><input class="fi" id="ym-issue" type="number" step="0.001" placeholder="0"></div>
+      <div class="fg"><label class="lbl">Rate ₹/kg</label><input class="fi" id="ym-rate" type="number" step="0.01" placeholder="0"></div>
+    </div>
+    <!-- TPM toggle -->
+    <div style="margin-top:14px;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:6px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text2)">
+        <input type="checkbox" id="ym-tpm" onchange="tpmToggle()" style="width:15px;height:15px;accent-color:var(--gold);cursor:pointer">
+        <span><strong style="color:var(--text)">TPM Yarn</strong> — purchased as S-twist &amp; Z-twist separately (e.g. 20N Jari, Zari)</span>
+      </label>
+      <div id="ym-tpm-fields" style="display:none;margin-top:10px">
+        <div class="alert alert-gold" style="margin-bottom:10px;font-size:10px">S + Z qty will be summed as total Purchase. Opening Balance and Issue remain unified.</div>
+        <div class="form-grid">
+          <div class="fg"><label class="lbl">Purchase — S Twist (kg)</label><input class="fi" id="ym-tpmS" type="number" step="0.001" placeholder="0" oninput="tpmSum()"></div>
+          <div class="fg"><label class="lbl">Purchase — Z Twist (kg)</label><input class="fi" id="ym-tpmZ" type="number" step="0.001" placeholder="0" oninput="tpmSum()"></div>
+          <div class="fg"><label class="lbl">Total Purchase (auto)</label><input class="fi computed" id="ym-tpmTotal" readonly placeholder="S + Z"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="mfoot">
+    <button class="btn btn-outline" onclick="closeModal('yarnModal')">Cancel</button>
+    <button class="btn btn-gold" onclick="saveYarn()">Save Entry</button>
+  </div>
+</div>
+</div>
+
+<!-- CLIENT -->
+<div id="clientModal" class="overlay" onclick="bgClose(event,'clientModal')">
+<div class="modal">
+  <div class="mhd"><div class="mtitle" id="cm-title">Add Client</div><button class="xbtn" onclick="closeModal('clientModal')">✕</button></div>
+  <div class="mbody">
+    <input type="hidden" id="cm-id">
+    <div class="form-grid">
+      <div class="fg full"><label class="lbl">Client Name *</label><input class="fi" id="cm-name" placeholder="e.g. SGO Fabrics"></div>
+      <div class="fg"><label class="lbl">Type</label>
+        <select class="fi" id="cm-type">
+          <option value="jw">Job Work Client</option>
+          <option value="own">Own / Nakshatra</option>
+        </select>
+      </div>
+      <div class="fg"><label class="lbl">Contact Person</label><input class="fi" id="cm-contact" placeholder="Name"></div>
+      <div class="fg"><label class="lbl">Phone</label><input class="fi" id="cm-phone" placeholder="+91 ..."></div>
+      <div class="fg"><label class="lbl">Job Rate ₹/m</label><input class="fi" id="cm-rate" type="number" step="0.01" placeholder="0"></div>
+      <div class="fg full"><label class="lbl">Notes</label><input class="fi" id="cm-notes" placeholder="..."></div>
+    </div>
+  </div>
+  <div class="mfoot">
+    <button class="btn btn-outline" onclick="closeModal('clientModal')">Cancel</button>
+    <button class="btn btn-gold" onclick="saveClient()">Save Client</button>
+  </div>
+</div>
+</div>
+
+<!-- RECIPE -->
+<div id="recipeModal" class="overlay" onclick="bgClose(event,'recipeModal')">
+<div class="modal">
+  <div class="mhd"><div class="mtitle" id="rm-title">Add Quality Recipe</div><button class="xbtn" onclick="closeModal('recipeModal')">✕</button></div>
+  <div class="mbody">
+    <input type="hidden" id="rm-id">
+    <div class="form-grid">
+      <div class="fg"><label class="lbl">Quality Name *</label><input class="fi" id="rm-quality" placeholder="UPADA_42"></div>
+      <div class="fg"><label class="lbl">SKU</label><input class="fi" id="rm-sku" placeholder="HTU42"></div>
+      <div class="fg"><label class="lbl">Reed Space (RS) cm</label><input class="fi" id="rm-rs" type="number" step="0.5" placeholder="45.5" oninput="rmPreview()"></div>
+      <div class="fg"><label class="lbl">Default Warp Yarn</label><input class="fi" id="rm-warpYarn" placeholder="100/38"></div>
+      <div class="fg"><label class="lbl">Warp Ends</label><input class="fi" id="rm-ends" type="number" placeholder="7100"></div>
+      <div class="fg"><label class="lbl">Warp Denier</label><input class="fi" id="rm-denier" type="number" placeholder="100"></div>
+    </div>
+    <div class="divlabel"><span>W1 Weft</span></div>
+    <div class="form-grid">
+      <div class="fg"><label class="lbl">W1 Yarn</label><input class="fi" id="rm-w1Yarn" placeholder="120/30"></div>
+      <div class="fg"><label class="lbl">W1 Denier</label><input class="fi" id="rm-w1Denier" type="number" placeholder="120" oninput="rmPreview()"></div>
+      <div class="fg"><label class="lbl">W1 PPI</label><input class="fi" id="rm-w1PPI" type="number" step="0.5" placeholder="51" oninput="rmPreview()"></div>
+      <div class="fg"><label class="lbl">W1 Weight g/m (auto)</label><input class="fi computed" id="rm-w1Wt" readonly placeholder="calculated"></div>
+    </div>
+    <div class="divlabel"><span>W2 Weft (optional)</span></div>
+    <div class="form-grid">
+      <div class="fg"><label class="lbl">W2 Yarn</label><input class="fi" id="rm-w2Yarn" placeholder="150_ATY"></div>
+      <div class="fg"><label class="lbl">W2 Denier</label><input class="fi" id="rm-w2Denier" type="number" placeholder="155" oninput="rmPreview()"></div>
+      <div class="fg"><label class="lbl">W2 PPI</label><input class="fi" id="rm-w2PPI" type="number" step="0.5" placeholder="29" oninput="rmPreview()"></div>
+      <div class="fg"><label class="lbl">W2 Weight g/m (auto)</label><input class="fi computed" id="rm-w2Wt" readonly placeholder="calculated"></div>
+    </div>
+  </div>
+  <div class="mfoot">
+    <button class="btn btn-outline" onclick="closeModal('recipeModal')">Cancel</button>
+    <button class="btn btn-gold" onclick="saveRecipe()">Save Recipe</button>
+  </div>
+</div>
+</div>
+
+<!-- PIPE -->
+<div id="pipeModal" class="overlay" onclick="bgClose(event,'pipeModal')">
+<div class="modal">
+  <div class="mhd"><div class="mtitle">Pipe Count — Party</div><button class="xbtn" onclick="closeModal('pipeModal')">✕</button></div>
+  <div class="mbody">
+    <input type="hidden" id="pm-id">
+    <div class="form-grid">
+      <div class="fg"><label class="lbl">Party Name *</label><input class="fi" id="pm-party" placeholder="NCPL" list="pm-party-list" autocomplete="off"><datalist id="pm-party-list"></datalist></div>
+      <div class="fg"><label class="lbl">Empty Pipes 230 cm</label><input class="fi" id="pm-e230" type="number" placeholder="0"></div>
+      <div class="fg"><label class="lbl">Empty Pipes 280 cm</label><input class="fi" id="pm-e280" type="number" placeholder="0"></div>
+    </div>
+  </div>
+  <div class="mfoot">
+    <button class="btn btn-outline" onclick="closeModal('pipeModal')">Cancel</button>
+    <button class="btn btn-gold" onclick="savePipe()">Save</button>
+  </div>
+</div>
+</div>
+
+<script>
+'use strict';
+// ══════════════════════════════════════════════
+//  THEME
+// ══════════════════════════════════════════════
+let theme = localStorage.getItem('kk_theme') || 'dark';
+const applyTheme = t => {
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('themeBtn').textContent = t === 'dark' ? '☀' : '☾';
+};
+function toggleTheme() { theme = theme === 'dark' ? 'light' : 'dark'; localStorage.setItem('kk_theme', theme); applyTheme(theme); }
+applyTheme(theme);
+
+// ══════════════════════════════════════════════
+//  STORE
+// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════
+//  SUPABASE CONFIG — paste your project URL and anon key here
+// ══════════════════════════════════════════════
+const SB_URL = 'YOUR_SUPABASE_URL';   // e.g. https://xxxx.supabase.co
+const SB_KEY = 'YOUR_SUPABASE_ANON_KEY'; // Settings → API → anon public
+
+let _sb = null;
+function sbInit() {
+  if (SB_URL.startsWith('YOUR') || SB_KEY.startsWith('YOUR')) return;
+  try { _sb = supabase.createClient(SB_URL, SB_KEY); } catch(e) { console.warn('Supabase init failed', e); }
+}
+
+function sbSync(label) {
+  const el = document.getElementById('syncBadge');
+  if (el) { el.textContent = label; el.style.display = 'inline'; }
+}
+
+async function sbPush(k, v) {
+  if (!_sb) return;
+  try {
+    await _sb.from('kk_store').upsert({ key: k, value: v }, { onConflict: 'key' });
+    sbSync('✓ synced');
+    setTimeout(() => { const el = document.getElementById('syncBadge'); if(el) el.style.display='none'; }, 2000);
+  } catch(e) { sbSync('⚠ offline'); }
+}
+
+async function sbPull() {
+  if (!_sb) return;
+  sbSync('⟳ syncing…');
+  try {
+    const { data, error } = await _sb.from('kk_store').select('key,value');
+    if (error || !data || !data.length) { sbSync('⚠ offline'); return; }
+    data.forEach(row => localStorage.setItem('kk2_'+row.key, JSON.stringify(row.value)));
+    // reload in-memory variables from freshly synced localStorage
+    recipes = KK.g('recipes', []);
+    looms   = KK.g('looms', []);
+    beams   = KK.g('beams', []);
+    yarns   = KK.g('yarns', []);
+    clients = KK.g('clients', []);
+    pipes   = KK.g('pipes', []);
+    sbSync('✓ synced');
+    setTimeout(() => { const el = document.getElementById('syncBadge'); if(el) el.style.display='none'; }, 2000);
+    render(activeTab);
+  } catch(e) { sbSync('⚠ offline'); }
+}
+
+// ══════════════════════════════════════════════
+//  STORE (localStorage + Supabase write-through)
+// ══════════════════════════════════════════════
+const KK = {
+  g: (k, d) => { try { return JSON.parse(localStorage.getItem('kk2_'+k)) ?? d; } catch { return d; } },
+  s: (k, v) => { localStorage.setItem('kk2_'+k, JSON.stringify(v)); sbPush(k, v); }
+};
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+const num = v => { const x = parseFloat(v); return isNaN(x) ? 0 : x; };
+const fi  = (v, d=1) => v === 0 || !v ? '—' : v.toLocaleString('en-IN', {minimumFractionDigits:d,maximumFractionDigits:d});
+const fiI = v => !v ? '—' : Math.round(v).toLocaleString('en-IN');
+const fiC = v => (!v||v===0) ? '—' : '₹'+Math.round(v).toLocaleString('en-IN');
+
+let recipes = KK.g('recipes', []);
+let looms   = KK.g('looms', []);
+let beams   = KK.g('beams', []);
+let yarns   = KK.g('yarns', []);
+let clients = KK.g('clients', []);
+let pipes   = KK.g('pipes', []);
+
+// ══════════════════════════════════════════════
+//  CALCULATIONS
+// ══════════════════════════════════════════════
+const wWt = (rs, den, ppi) => (rs && den && ppi) ? rs*den*ppi/90000 : 0;
+
+function calcLoom(l) {
+  const rec    = recipes.find(r => r.quality === l.quality) || {};
+  const ends   = num(l.ends   || rec.ends   || 0);
+  const denier = num(l.denier || rec.denier || 0);
+  const panna  = num(l.panna) || 2;
+  const opBal  = num(l.opBal);
+  const mcBal  = num(l.mcBal);
+  const day    = num(l.dayProd);
+  const night  = num(l.nightProd);
+
+  const rs     = num(rec.rs || 0);
+  const w1Wt   = wWt(rs, num(rec.w1Denier), num(rec.w1PPI));
+  const w2Wt   = wWt(rs, num(rec.w2Denier), num(rec.w2PPI));
+
+  const diff      = mcBal - opBal;
+  const closing   = mcBal - day - night;
+  const totProd   = day + night;
+  const bfDays    = totProd > 0 ? mcBal / totProd : 0;
+  const waKgs     = ends && denier ? ends * denier * Math.max(0, closing) / 9000000 : 0;
+
+  // on-loom total remaining consumption
+  const w1Cons  = closing > 0 ? closing * panna * w1Wt / 100 : 0;
+  const w2Cons  = closing > 0 ? closing * panna * w2Wt / 100 : 0;
+
+  // daily rate
+  const w1Daily = totProd > 0 ? totProd * panna * w1Wt / 100 : 0;
+  const w2Daily = totProd > 0 ? totProd * panna * w2Wt / 100 : 0;
+
+  return {
+    diff, closing, totProd, bfDays, waKgs,
+    w1Wt, w2Wt, w1Cons, w2Cons, w1Daily, w2Daily,
+    w1Yarn: rec.w1Yarn||'', w2Yarn: rec.w2Yarn||'',
+    panna, ends, denier
+  };
+}
+
+function calcBeam(b) {
+  const kgs = num(b.ends) * num(b.denier) * num(b.meters) / 9000000;
+  return { kgs, amount: kgs * num(b.rate) };
+}
+
+function getClientName(id) {
+  const c = clients.find(x => x.id === id);
+  return c ? c.name : (id || '');
+}
+
+// ══════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════
+let activeTab = 'dash';
+document.getElementById('tabRow').addEventListener('click', e => {
+  const t = e.target.closest('[data-tab]');
+  if (t) switchTab(t.dataset.tab);
+});
+function switchTab(id) {
+  activeTab = id;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-'+id));
+  render(id);
+}
+function render(id) {
+  if (id==='dash')    renderDash();
+  else if (id==='looms')   renderLooms();
+  else if (id==='beams')   renderBeams();
+  else if (id==='yarn')    renderYarn();
+  else if (id==='clients') renderClients();
+  else if (id==='recipes') renderRecipes();
+  else if (id==='pipes')   renderPipes();
+}
+
+// ══════════════════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════════════════
+function renderDash() {
+  // aggregate
+  let ownM=0, jwM=0, totProd=0, totKgs=0;
+  const qualMap = {};
+
+  // beam fall data
+  const bfRows = looms.map(l => {
+    const c = calcLoom(l);
+    const clos = Math.max(0, c.closing);
+    if (l.workType==='jw') jwM+=clos; else ownM+=clos;
+    totProd += c.totProd;
+    totKgs  += c.waKgs;
+    const qk = (l.quality||'?')+'||'+(l.workType==='jw'?getClientName(l.client)||'JW':'Own');
+    qualMap[qk] = qualMap[qk] || { quality:l.quality||'?', label:l.workType==='jw'?getClientName(l.client)||'JW':'Own Production', running:0, stock:0 };
+    qualMap[qk].running += clos;
+    return { ...l, c };
+  }).filter(l => l.c.totProd > 0 || l.c.bfDays > 0) // only machines with some production data
+    .sort((a,b) => {
+      const da = a.c.bfDays || 9999, db = b.c.bfDays || 9999;
+      return da - db;
+    });
+
+  beams.forEach(b => {
+    const qk = (b.quality||'?')+'||Stock';
+    qualMap[qk] = qualMap[qk] || { quality:b.quality||'?', label:'Beam Stock', running:0, stock:0 };
+    qualMap[qk].stock += num(b.meters);
+  });
+
+  // beam fall table
+  const bfHtml = bfRows.length === 0
+    ? '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text3)">Enter Day/Night production to see beam fall prediction</td></tr>'
+    : bfRows.map(l => {
+        const c = l.c;
+        const days = c.bfDays;
+        const cls = days <= 10 ? 'bf-crit' : days <= 20 ? 'bf-warn' : '';
+        const badge = days <= 10
+          ? `<span class="badge b-red">⚠ ${days.toFixed(1)}d — ORDER BEAM</span>`
+          : days <= 20
+            ? `<span class="badge b-amber">${days.toFixed(1)}d — PLAN SOON</span>`
+            : `<span class="badge b-green">${days.toFixed(1)}d</span>`;
+        const diffCls = Math.abs(c.diff) > 20 ? 'diff-bad' : Math.abs(c.diff) > 8 ? 'diff-warn' : 'diff-ok';
+        const isJW = l.workType === 'jw';
+        return `<tr class="${cls}">
+          <td class="dim">${l.machNo||'—'}</td>
+          <td>${l.beamNo||'—'}</td>
+          <td><span class="badge b-gold" style="font-size:9px">${l.quality||'—'}</span></td>
+          <td><span class="badge ${isJW?'b-jw':'b-own'}" style="font-size:9px">${isJW?getClientName(l.client)||'JW':'Own'}</span></td>
+          <td class="r">${fiI(c.closing)}</td>
+          <td class="r dim">${fiI(c.totProd)}/day</td>
+          <td class="r ${diffCls}">${c.diff>0?'+':''}${fiI(c.diff)}</td>
+          <td>${badge}</td>
+        </tr>`;
+      }).join('');
+
+  // quality summary
+  const qualRows = Object.values(qualMap)
+    .filter(q => q.quality !== '?')
+    .sort((a,b) => b.running - a.running)
+    .map(q => `<tr>
+      <td><span class="badge b-gold" style="font-size:9px">${q.quality}</span></td>
+      <td class="dim">${q.label}</td>
+      <td class="r gold">${fiI(q.running)}</td>
+      <td class="r dim">${fiI(q.stock)}</td>
+      <td class="r strong gold">${fiI(q.running+q.stock)}</td>
+    </tr>`).join('');
+
+  document.getElementById('dash-content').innerHTML = `
+    <div class="cards mb16">
+      <div class="card gold"><div class="c-label">Machines Running</div><div class="c-val">${looms.length}</div><div class="c-sub">${looms.filter(l=>l.workType==='jw').length} job work · ${looms.filter(l=>l.workType!=='jw').length} own</div></div>
+      <div class="card gold"><div class="c-label">Own Meters (closing)</div><div class="c-val sm">${fiI(ownM)}</div><div class="c-sub">own production</div></div>
+      <div class="card red"><div class="c-label">Job Work Meters</div><div class="c-val sm">${fiI(jwM)}</div><div class="c-sub">client machines</div></div>
+      <div class="card plain"><div class="c-label">Today's Production</div><div class="c-val sm">${fiI(totProd)}</div><div class="c-sub">day + night</div></div>
+      <div class="card plain"><div class="c-label">Total Warp KGS</div><div class="c-val sm">${fi(totKgs,1)}</div><div class="c-sub">on loom</div></div>
+      <div class="card ${bfRows.filter(l=>l.c.bfDays<=10&&l.c.bfDays>0).length>0?'red':'plain'}">
+        <div class="c-label">Critical Beam Falls</div>
+        <div class="c-val">${bfRows.filter(l=>l.c.bfDays<=10&&l.c.bfDays>0).length}</div>
+        <div class="c-sub">machines ≤10 days</div>
+      </div>
+    </div>
+
+    <div class="sec-hdr mb8"><div class="sec-title">Beam Fall Forecast</div><div class="sec-sub">Sorted by urgency — Red ≤ 10 days, Amber ≤ 20 days</div></div>
+    <div class="tbox mb20">
+      <table>
+        <thead><tr>
+          <th>M/C</th><th>Beam No</th><th>Quality</th><th>Type / Client</th>
+          <th class="r">Closing Bal</th><th class="r">Avg Prod</th>
+          <th class="r">DIFF (MC−Op)</th><th>Days Remaining</th>
+        </tr></thead>
+        <tbody>${bfHtml}</tbody>
+      </table>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="sec-title mb8" style="font-size:17px">Quality Summary</div>
+        <div class="tbox">
+          <table>
+            <thead><tr><th>Quality</th><th>Client / Type</th><th class="r">Running (m)</th><th class="r">Beam Stock</th><th class="r">Total</th></tr></thead>
+            <tbody>${qualRows||'<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">No data</td></tr>'}</tbody>
+            ${Object.keys(qualMap).length>0?`<tfoot><tr><td colspan="2">Total</td>
+              <td class="r">${fiI(Object.values(qualMap).reduce((s,q)=>s+q.running,0))}</td>
+              <td class="r">${fiI(Object.values(qualMap).reduce((s,q)=>s+q.stock,0))}</td>
+              <td class="r">${fiI(Object.values(qualMap).reduce((s,q)=>s+q.running+q.stock,0))}</td>
+            </tr></tfoot>`:''}
+          </table>
+        </div>
+      </div>
+      <div>
+        <div class="sec-title mb8" style="font-size:17px">Client / Party Breakdown</div>
+        <div class="tbox">
+          <table>
+            <thead><tr><th>Client</th><th>Machines</th><th class="r">Running (m)</th></tr></thead>
+            <tbody>
+              ${(() => {
+                const map = {};
+                looms.forEach(l => {
+                  const key = l.workType==='jw' ? (getClientName(l.client)||'JW') : 'Own Production';
+                  map[key] = map[key]||{count:0,meters:0};
+                  map[key].count++;
+                  map[key].meters += Math.max(0, calcLoom(l).closing);
+                });
+                return Object.entries(map).map(([k,v])=>`<tr><td>${k}</td><td class="dim">${v.count}</td><td class="r gold">${fiI(v.meters)}</td></tr>`).join('') || '<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text3)">No looms</td></tr>';
+              })()}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════════
+//  LOOM TRACKER
+// ══════════════════════════════════════════════
+function renderLooms() {
+  const el = document.getElementById('loom-content');
+  if (!looms.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-ico">⊞</div><p>No machines added yet.<br>Click <strong>+ Add Machine</strong> to get started.</p></div>`;
+    return;
+  }
+
+  // check if any machine has been rolled over recently
+  const lastRoll = KK.g('lastRoll', null);
+  const rollInfo = lastRoll ? `<div class="rollover-bar"><span class="rollover-text">Last rolled over: <strong>${lastRoll}</strong> — Opening Balance = previous Closing Balance</span></div>` : '';
+
+  // Sort looms
+  const sortKey = document.getElementById('loomSort')?.value || 'machNo';
+  const sorted = [...looms].sort((a, b) => {
+    if (sortKey === 'machNo')  return (a.machNo||0) - (b.machNo||0);
+    if (sortKey === 'quality') return (a.quality||''). localeCompare(b.quality||'');
+    if (sortKey === 'party')   return (a.party||''). localeCompare(b.party||'');
+    if (sortKey === 'bfDays')  { const ca=calcLoom(a),cb=calcLoom(b); const da=ca.bfDays||9999,db=cb.bfDays||9999; return da-db; }
+    if (sortKey === 'closing') { const ca=calcLoom(a),cb=calcLoom(b); return cb.closing-ca.closing; }
+    return 0;
+  });
+  let tOp=0,tMc=0,tDay=0,tNight=0,tClose=0,tKgs=0;
+  const rows = sorted.map(l => {
+    const c = calcLoom(l);
+    tOp+=num(l.opBal); tMc+=num(l.mcBal);
+    tDay+=num(l.dayProd); tNight+=num(l.nightProd);
+    tClose+=c.closing; tKgs+=c.waKgs;
+    const isJW = l.workType === 'jw';
+    const bfCls = c.bfDays > 0 && c.bfDays <= 10 ? 'b-red' : c.bfDays <= 20 ? 'b-amber' : 'b-green';
+    const bfTxt = c.bfDays > 0 ? `<span class="badge ${bfCls}">${c.bfDays.toFixed(1)}d</span>` : '—';
+    const diffCls = Math.abs(c.diff) > 20 ? 'diff-bad' : Math.abs(c.diff) > 8 ? 'diff-warn' : 'diff-ok';
+    const w1badge = c.w1Yarn ? `<span class="badge b-dim" style="font-size:8px">${c.w1Yarn}</span>` : `<span class="badge b-red" style="font-size:8px">NOT SET</span>`;
+    const w2badge = c.w2Yarn ? `<span class="badge b-dim" style="font-size:8px">${c.w2Yarn}</span>` : '';
+    const pannaCls = c.panna === 1 ? 'b-amber' : 'b-dim';
+    return `<tr class="${isJW?'':''}">
+      <td class="dim">${l.machNo||'—'}</td>
+      <td>${l.beamNo||'—'}</td>
+      <td>
+        <span class="badge ${isJW?'b-jw':'b-own'}" style="font-size:8px">${isJW?'JW':'OWN'}</span>
+        ${isJW&&l.client?`<span style="font-size:10px;color:var(--text3);margin-left:3px">${getClientName(l.client)}</span>`:''}
+      </td>
+      <td class="dim" style="font-size:10px">${l.party||'—'}</td>
+      <td><span class="badge b-gold" style="font-size:8px">${l.quality||'—'}</span></td>
+      <td class="dim" style="font-size:10px">${l.warpYarn||'—'}</td>
+      <td class="r"><span class="badge ${pannaCls}">${c.panna}P</span></td>
+      <td class="r"><input class="ci" type="number" value="${l.opBal||0}" onchange="patch('${l.id}','opBal',this.value)"></td>
+      <td class="r"><input class="ci" type="number" value="${l.mcBal||0}" onchange="patch('${l.id}','mcBal',this.value)"></td>
+      <td class="r ${diffCls}" style="font-weight:500">${c.diff>0?'+':''}${fiI(c.diff)}</td>
+      <td class="r"><input class="ci" type="number" value="${l.dayProd||0}" onchange="patch('${l.id}','dayProd',this.value)"></td>
+      <td class="r"><input class="ci" type="number" value="${l.nightProd||0}" onchange="patch('${l.id}','nightProd',this.value)"></td>
+      <td class="r gold strong">${fiI(c.closing)}</td>
+      <td>${bfTxt}</td>
+      <td class="r gold">${fi(c.waKgs)}</td>
+      <td>${w1badge}</td>
+      <td class="r ${c.w1Cons?'gold':'dim'}">${c.w1Cons?fi(c.w1Cons,2):'—'}</td>
+      <td>${w2badge}</td>
+      <td class="r ${c.w2Cons?'gold':'dim'}">${c.w2Cons?fi(c.w2Cons,2):'—'}</td>
+      <td>
+        <div style="display:flex;gap:3px">
+          <button class="btn btn-outline btn-sm btn-ico" onclick="openLoomModal('${l.id}')">✏</button>
+          <button class="btn btn-red btn-sm btn-ico" onclick="delLoom('${l.id}')">✕</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    ${rollInfo}
+    <div class="tbox">
+      <table>
+        <thead><tr>
+          <th>M/C</th><th>Beam No</th><th>Type</th><th>Party</th><th>Quality</th><th>Warp</th><th>Panna</th>
+          <th class="r">Op Bal</th><th class="r">MC Bal</th>
+          <th class="r" title="MC Balance − Opening Balance. Should be near zero.">DIFF ↕</th>
+          <th class="r">Day</th><th class="r">Night</th>
+          <th class="r" style="color:var(--gold)">Closing ✓</th>
+          <th>B/F Days</th>
+          <th class="r" style="color:var(--gold)">WA KGS</th>
+          <th>W1</th><th class="r" style="color:var(--gold)">W1 Cons</th>
+          <th>W2</th><th class="r" style="color:var(--gold)">W2 Cons</th>
+          <th></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr>
+          <td colspan="7">Total — ${looms.length} machines</td>
+          <td class="r">${fiI(tOp)}</td><td class="r">${fiI(tMc)}</td><td></td>
+          <td class="r">${fiI(tDay)}</td><td class="r">${fiI(tNight)}</td>
+          <td class="r gold">${fiI(tClose)}</td>
+          <td></td><td class="r gold">${fi(tKgs)}</td>
+          <td colspan="5"></td>
+        </tr></tfoot>
+      </table>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--text3);font-family:'IBM Plex Mono'">
+      DIFF = MC Balance − Opening Balance · Closing = MC Balance − Day − Night · B/F Days = MC Balance ÷ (Day+Night)
+    </div>`;
+}
+
+function patch(id, field, val) {
+  const i = looms.findIndex(l => l.id === id);
+  if (i >= 0) { looms[i][field] = parseFloat(val)||0; KK.s('looms', looms); }
+}
+
+function rollToNextDay() {
+  if (!looms.length) return;
+  const lines = looms.map(l => {
+    const c = calcLoom(l);
+    return 'M/C ' + l.machNo + ' (' + l.beamNo + '): Closing ' + fiI(c.closing) + 'm → new Opening';
+  }).join('\n');
+  if (!confirm('Roll to Next Day?\n\nThis will:\n• Set Opening Balance = today Closing for all machines\n• Reset Day & Night production to 0\n• Update M/C Balance = Closing Balance\n\n' + lines + '\n\nProceed?')) return;
+
+  // ── SAVE SNAPSHOT BEFORE ROLLING ──
+  const snapDate = new Date().toISOString().slice(0,10);
+  const snapTime = new Date().toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  const snapshot = {
+    date: snapDate,
+    label: snapTime,
+    rows: looms.map(l => {
+      const c = calcLoom(l);
+      return {
+        machNo: l.machNo, beamNo: l.beamNo,
+        party: l.party||'', quality: l.quality||'',
+        workType: l.workType, client: getClientName(l.client)||'',
+        panna: l.panna||2,
+        opBal: num(l.opBal), mcBal: num(l.mcBal),
+        diff: c.diff, dayProd: num(l.dayProd), nightProd: num(l.nightProd),
+        closing: c.closing, bfDays: c.bfDays, waKgs: c.waKgs,
+        w1Yarn: c.w1Yarn, w1Cons: c.w1Cons,
+        w2Yarn: c.w2Yarn, w2Cons: c.w2Cons
+      };
+    })
+  };
+  let history = KK.g('history', []);
+  // replace if same date, otherwise prepend
+  history = history.filter(h => h.date !== snapDate);
+  history.unshift(snapshot);
+  if (history.length > 60) history = history.slice(0, 60); // keep 60 days
+  KK.s('history', history);
+
+  // ── DO THE ROLL ──
+  looms.forEach(l => {
+    const c = calcLoom(l);
+    const newBal = Math.max(0, c.closing);
+    l.opBal = newBal;
+    l.mcBal = newBal;
+    l.dayProd = 0;
+    l.nightProd = 0;
+  });
+  KK.s('looms', looms);
+  const now = new Date().toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  KK.s('lastRoll', now);
+  renderLooms();
+}
+
+function openHistory() {
+  const history = KK.g('history', []);
+  const dateRow = document.getElementById('history-date-row');
+  const tableDiv = document.getElementById('history-table');
+
+  if (!history.length) {
+    dateRow.innerHTML = '';
+    tableDiv.innerHTML = '<div class="empty"><div class="empty-ico">📋</div><p>No history yet.<br>History is saved each time you click <strong>Roll to Next Day</strong>.</p></div>';
+    openModal('historyModal');
+    return;
+  }
+
+  // build date buttons with delete
+  dateRow.innerHTML = history.map((h, i) =>
+    '<div style="display:flex;align-items:center;gap:2px">'+
+    '<button class="btn ' + (i===0?'btn-gold':'btn-outline') + ' btn-sm" onclick="showHistoryDate(' + i + ',this)">' + h.label + '</button>'+
+    '<button class="btn btn-red btn-sm btn-ico" onclick="deleteHistory('+i+')" title="Delete this snapshot" style="width:20px;height:20px;font-size:10px">✕</button>'+
+    '</div>'
+  ).join('');
+
+  showHistoryDate(0, dateRow.querySelector('.btn-gold'));
+  openModal('historyModal');
+}
+
+function showHistoryDate(idx, btn) {
+  // update active button style
+  document.querySelectorAll('#history-date-row .btn').forEach(b => {
+    b.className = b.className.replace('btn-gold','btn-outline');
+  });
+  if (btn) btn.className = btn.className.replace('btn-outline','btn-gold');
+
+  const history = KK.g('history', []);
+  const snap = history[idx];
+  if (!snap) return;
+
+  const rows = snap.rows.map((r, i) => {
+    const isJW = r.workType === 'jw';
+    const diffCls = Math.abs(r.diff) > 20 ? 'red' : Math.abs(r.diff) > 8 ? 'amber' : 'green';
+    const bfCls = r.bfDays > 0 && r.bfDays <= 10 ? 'b-red' : r.bfDays <= 20 ? 'b-amber' : 'b-green';
+    return '<tr>' +
+      '<td class="dim">' + r.machNo + '</td>' +
+      '<td>' + r.beamNo + '</td>' +
+      '<td><span class="badge ' + (isJW?'b-jw':'b-own') + '" style="font-size:8px">' + (isJW?'JW':'OWN') + '</span>' + (isJW&&r.client?' <span style="font-size:10px;color:var(--text3)">'+r.client+'</span>':'') + '</td>' +
+      '<td class="dim">' + (r.party||'—') + '</td>' +
+      '<td><span class="badge b-gold" style="font-size:8px">' + (r.quality||'—') + '</span></td>' +
+      '<td class="r dim">' + fiI(r.opBal) + '</td>' +
+      '<td class="r dim">' + fiI(r.mcBal) + '</td>' +
+      '<td class="r ' + diffCls + '">' + (r.diff>0?'+':'') + fiI(r.diff) + '</td>' +
+      '<td class="r dim">' + fiI(r.dayProd) + '</td>' +
+      '<td class="r dim">' + fiI(r.nightProd) + '</td>' +
+      '<td class="r gold strong">' + fiI(r.closing) + '</td>' +
+      '<td>' + (r.bfDays>0?'<span class="badge '+bfCls+'" style="font-size:9px">'+r.bfDays.toFixed(1)+'d</span>':'—') + '</td>' +
+      '<td class="r gold">' + fi(r.waKgs) + '</td>' +
+      '<td><span class="badge b-dim" style="font-size:8px">' + (r.w1Yarn||'—') + '</span></td>' +
+      '<td class="r gold">' + (r.w1Cons>0?fi(r.w1Cons,2):'—') + '</td>' +
+    '</tr>';
+  }).join('');
+
+  document.getElementById('history-table').innerHTML =
+    '<div class="tbox"><table>' +
+    '<thead><tr>' +
+    '<th>M/C</th><th>Beam</th><th>Type</th><th>Party</th><th>Quality</th>' +
+    '<th class="r">Op Bal</th><th class="r">MC Bal</th><th class="r">DIFF</th>' +
+    '<th class="r">Day</th><th class="r">Night</th>' +
+    '<th class="r" style="color:var(--gold)">Closing</th>' +
+    '<th>B/F Days</th><th class="r" style="color:var(--gold)">WA KGS</th>' +
+    '<th>W1</th><th class="r" style="color:var(--gold)">W1 Cons</th>' +
+    '</tr></thead>' +
+    '<tbody>' + rows + '</tbody>' +
+    '</table></div>';
+}
+
+function deleteHistory(idx) {
+  if (!confirm('Delete this snapshot?')) return;
+  let history = KK.g('history', []);
+  history.splice(idx, 1);
+  KK.s('history', history);
+  // re-render history panel
+  if (!history.length) { closeModal('historyModal'); return; }
+  openHistory();
+}
+
+function delLoom(id) {
+  if (!confirm('Remove this machine?')) return;
+  looms = looms.filter(l => l.id !== id);
+  KK.s('looms', looms);
+  renderLooms();
+}
+
+// ══════════════════════════════════════════════
+//  WEFT YARN — with consumption analysis
+// ══════════════════════════════════════════════
+function buildConsumptionMap() {
+  // Group daily consumption by yarn name across all looms
+  const map = {}; // yarnName → { daily, machines: [] }
+  looms.forEach(l => {
+    const c = calcLoom(l);
+    const quality = l.quality || '?';
+    const client  = l.workType==='jw' ? (getClientName(l.client)||'JW') : 'Own';
+    if (c.w1Yarn && c.w1Daily > 0) {
+      map[c.w1Yarn] = map[c.w1Yarn] || { daily:0, machines:[], qualities:new Set() };
+      map[c.w1Yarn].daily += c.w1Daily;
+      map[c.w1Yarn].machines.push(`M${l.machNo}`);
+      map[c.w1Yarn].qualities.add(`${quality}/${client}`);
+    }
+    if (c.w2Yarn && c.w2Daily > 0) {
+      map[c.w2Yarn] = map[c.w2Yarn] || { daily:0, machines:[], qualities:new Set() };
+      map[c.w2Yarn].daily += c.w2Daily;
+      map[c.w2Yarn].machines.push(`M${l.machNo}`);
+      map[c.w2Yarn].qualities.add(`${quality}/${client}`);
+    }
+  });
+  return map;
+}
+
+function fuzzyMatch(yarnName, stockQuality) {
+  // normalize both for comparison
+  const n1 = yarnName.toLowerCase().replace(/[_\s-]/g,'');
+  const n2 = stockQuality.toLowerCase().replace(/[_\s-]/g,'');
+  return n1 === n2 || n1.includes(n2) || n2.includes(n1);
+}
+
+function renderYarn() {
+  const el = document.getElementById('yarn-content');
+
+  // ── BUILD AGGREGATIONS ──
+  // Per-machine consumption rows
+  const machRows = looms.map((l, i) => {
+    const c = calcLoom(l);
+    return { idx: i+1, machNo: l.machNo, party: l.party||'—', quality: l.quality||'—',
+             w1Yarn: c.w1Yarn, w1Cons: c.w1Cons, w2Yarn: c.w2Yarn, w2Cons: c.w2Cons };
+  });
+
+  // Yarn-level totals (Weft Required by Yarn)
+  const yarnTotals = {}; // yarnName → total kg
+  looms.forEach(l => {
+    const c = calcLoom(l);
+    if (c.w1Yarn && c.w1Cons > 0) { yarnTotals[c.w1Yarn] = (yarnTotals[c.w1Yarn]||0) + c.w1Cons; }
+    if (c.w2Yarn && c.w2Cons > 0) { yarnTotals[c.w2Yarn] = (yarnTotals[c.w2Yarn]||0) + c.w2Cons; }
+  });
+
+  // Party × Yarn totals (Table1)
+  const partyYarnMap = {}; // "party||yarn" → { party, yarn, total }
+  looms.forEach(l => {
+    const c = calcLoom(l);
+    const party = l.party || '—';
+    if (c.w1Yarn && c.w1Cons > 0) {
+      const k = party + '||' + c.w1Yarn;
+      partyYarnMap[k] = partyYarnMap[k] || { party, yarn: c.w1Yarn, total: 0 };
+      partyYarnMap[k].total += c.w1Cons;
+    }
+    if (c.w2Yarn && c.w2Cons > 0) {
+      const k = party + '||' + c.w2Yarn;
+      partyYarnMap[k] = partyYarnMap[k] || { party, yarn: c.w2Yarn, total: 0 };
+      partyYarnMap[k].total += c.w2Cons;
+    }
+  });
+
+  // ── TABLE 1: Per-machine weft consumption ──
+  let machHtml = '';
+  if (machRows.length > 0) {
+    const mrows = machRows.map(r => `<tr>
+      <td class="dim">${r.idx}</td>
+      <td class="dim">${r.machNo}</td>
+      <td class="dim">${r.party}</td>
+      <td><span class="badge b-gold" style="font-size:8px">${r.quality}</span></td>
+      <td>${r.w1Yarn ? '<span class="badge b-dim" style="font-size:8px">'+r.w1Yarn+'</span>' : '<span class="dim">—</span>'}</td>
+      <td class="r ${r.w1Cons > 0 ? 'gold' : 'dim'}">${r.w1Cons > 0 ? fi(r.w1Cons, 3) : '—'}</td>
+      <td>${r.w2Yarn ? '<span class="badge b-dim" style="font-size:8px">'+r.w2Yarn+'</span>' : '<span class="dim">—</span>'}</td>
+      <td class="r ${r.w2Cons > 0 ? 'gold' : 'dim'}">${r.w2Cons > 0 ? fi(r.w2Cons, 3) : '—'}</td>
+    </tr>`).join('');
+    const tW1 = machRows.reduce((s,r) => s + r.w1Cons, 0);
+    const tW2 = machRows.reduce((s,r) => s + r.w2Cons, 0);
+    machHtml = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="sec-title" style="font-size:17px">Weft Consumption — On Loom</div>
+        <button class="btn btn-outline btn-sm" onclick="toggleWeftCons(this)" style="font-family:'IBM Plex Mono';font-size:10px;min-width:80px">▲ Collapse</button>
+      </div>
+      <div id="weft-cons-body">
+        <div class="alert alert-dim mb8">Total weft needed to weave out remaining beam balance. Formula: Closing Balance × Panna × W_Weight (g/m) / 100</div>
+        <div class="tbox mb20">
+          <table>
+            <thead><tr>
+              <th>#</th><th>M/C</th><th>Party</th><th>Quality</th>
+              <th>W1 Yarn</th><th class="r" style="color:var(--gold)">W1 Cons (kg)</th>
+              <th>W2 Yarn</th><th class="r" style="color:var(--gold)">W2 Cons (kg)</th>
+            </tr></thead>
+            <tbody>${mrows}</tbody>
+            <tfoot><tr>
+              <td colspan="5">Total</td>
+              <td class="r">${fi(tW1, 2)}</td>
+              <td></td>
+              <td class="r">${tW2 > 0 ? fi(tW2, 2) : '—'}</td>
+            </tr></tfoot>
+          </table>
+        </div>
+      </div>`;
+  }
+
+  // ── TABLE 2: Weft Required by Yarn + Party×Yarn side by side ──
+  let aggHtml = '';
+  if (Object.keys(yarnTotals).length > 0) {
+    const yarnRows = Object.entries(yarnTotals)
+      .sort((a,b) => b[1] - a[1])
+      .map(([yarn, total], i) => {
+        // try to match stock
+        const match = yarns.find(y => fuzzyMatch(yarn, y.quality));
+        const stock = match ? num(match.opBal)+num(match.purchase)-num(match.issue) : null;
+        const deficit = stock !== null ? stock - total : null;
+        const defCls = deficit === null ? 'dim' : deficit >= 0 ? 'green' : 'red';
+        return `<tr>
+          <td class="dim">${i+1}</td>
+          <td><span class="badge b-dim" style="font-size:9px">${yarn}</span></td>
+          <td class="r gold strong">${fi(total, 2)}</td>
+          <td class="r ${stock!==null?'':'dim'}">${stock!==null ? fi(stock,2) : '—'}</td>
+          <td class="r ${defCls}" style="font-weight:${deficit!==null&&deficit<0?'600':'400'}">${deficit!==null ? (deficit>=0?'+':'')+fi(deficit,2) : '—'}</td>
+        </tr>`;
+      }).join('');
+
+    const pyRows = Object.values(partyYarnMap)
+      .sort((a,b) => a.party.localeCompare(b.party) || b.total - a.total)
+      .map(r => `<tr>
+        <td>${r.party}</td>
+        <td><span class="badge b-dim" style="font-size:9px">${r.yarn}</span></td>
+        <td class="r gold strong">${fi(r.total, 2)}</td>
+      </tr>`).join('');
+
+    aggHtml = `
+      <div style="display:grid;grid-template-columns:3fr 2fr;gap:16px;margin-bottom:20px">
+        <div>
+          <div class="sec-title mb8" style="font-size:17px">Weft Required — By Yarn</div>
+          <div class="tbox">
+            <table>
+              <thead><tr>
+                <th>#</th><th>Weft Yarn</th>
+                <th class="r" style="color:var(--gold)">Required (kg)</th>
+                <th class="r">Stock (kg)</th>
+                <th class="r">Surplus / Deficit</th>
+              </tr></thead>
+              <tbody>${yarnRows}</tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <div class="sec-title mb8" style="font-size:17px">Party × Yarn</div>
+          <div class="tbox">
+            <table>
+              <thead><tr><th>Party</th><th>Yarn</th><th class="r" style="color:var(--gold)">Cons. (kg)</th></tr></thead>
+              <tbody>${pyRows}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ── STOCK VS DAILY RATE ──
+  const consMap = buildConsumptionMap();
+  let stockVsRateHtml = '';
+  if (Object.keys(consMap).length > 0) {
+    const rows = Object.entries(consMap).map(([yarn, data]) => {
+      const match = yarns.find(y => fuzzyMatch(yarn, y.quality));
+      const stock = match ? num(match.opBal)+num(match.purchase)-num(match.issue) : null;
+      const daysLeft = stock !== null && data.daily > 0 ? stock / data.daily : null;
+      const badge = daysLeft === null ? '<span class="badge b-dim">—</span>'
+        : daysLeft <= 10 ? `<span class="badge b-red">⚠ ${daysLeft.toFixed(1)}d</span>`
+        : daysLeft <= 20 ? `<span class="badge b-amber">${daysLeft.toFixed(1)}d</span>`
+        : `<span class="badge b-green">${daysLeft.toFixed(1)}d OK</span>`;
+      return `<tr>
+        <td class="text-mono">${yarn}</td>
+        <td class="r amber">${fi(data.daily,2)} kg/day</td>
+        <td class="r ${stock!==null?'gold':'dim'}">${stock!==null?fi(stock,2):'—'}</td>
+        <td>${badge}</td>
+      </tr>`;
+    }).join('');
+    stockVsRateHtml = `
+      <div class="sec-title mb8" style="font-size:17px">Daily Rate vs Stock</div>
+      <div class="tbox mb20">
+        <table>
+          <thead><tr><th>Yarn</th><th class="r">Daily Consumption</th><th class="r">Stock (kg)</th><th>Days Remaining</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  // ── YARN STOCK REGISTER ──
+  let stockHtml = '';
+  if (!yarns.length) {
+    stockHtml = `<div class="empty"><div class="empty-ico">⬡</div><p>No yarn entries yet. Click <strong>+ Add Entry</strong>.</p></div>`;
+  } else {
+    let tAmt = 0;
+    const rows = yarns.map(y => {
+      const bal = num(y.opBal)+num(y.purchase)-num(y.issue);
+      const amt = bal*num(y.rate); tAmt+=amt;
+      const low = bal < 50;
+      return `<tr>
+        <td class="text-mono">${y.quality||'—'}</td>
+        <td class="dim">${y.party||'—'}</td>
+        <td>${y.tpm?'<span class="badge b-amber" style="font-size:8px">S '+fi(y.tpmS,2)+' / Z '+fi(y.tpmZ,2)+'</span>':''}</td>
+        <td class="r dim">${fi(num(y.opBal),3)}</td>
+        <td class="r green">${num(y.purchase)?'+'+fi(num(y.purchase),3):'—'}</td>
+        <td class="r red">${num(y.issue)?'−'+fi(num(y.issue),3):'—'}</td>
+        <td class="r ${low?'red':'gold'}" style="font-weight:${low?'600':'400'}">${fi(bal,3)}</td>
+        <td>${low?'<span class="badge b-red">LOW</span>':''}</td>
+        <td class="r dim">${num(y.rate)?'₹'+fi(num(y.rate),2):'—'}</td>
+        <td class="r">${fiC(amt)}</td>
+        <td><div style="display:flex;gap:3px">
+          <button class="btn btn-outline btn-sm btn-ico" onclick="openYarnModal('${y.id}')">✏</button>
+          <button class="btn btn-red btn-sm btn-ico" onclick="delYarn('${y.id}')">✕</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+    stockHtml = `
+      <div class="sec-title mb8" style="font-size:17px">Yarn Stock Register</div>
+      <div class="tbox">
+        <table>
+          <thead><tr>
+            <th>Yarn Quality</th><th>Party</th><th>TPM</th>
+            <th class="r">Op. Bal</th><th class="r">+ Purchase</th><th class="r">− Issue</th>
+            <th class="r" style="color:var(--gold)">Balance (kg)</th>
+            <th>Status</th><th class="r">Rate</th><th class="r">Value</th><th></th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+          <tfoot><tr><td colspan="9">Total Stock Value</td><td class="r">${fiC(tAmt)}</td><td></td></tr></tfoot>
+        </table>
+      </div>`;
+  }
+
+  el.innerHTML = machHtml + aggHtml + stockVsRateHtml + stockHtml;
+}
+function delYarn(id) { if (!confirm('Remove entry?')) return; yarns=yarns.filter(y=>y.id!==id); KK.s('yarns',yarns); renderYarn(); }
+
+// ══════════════════════════════════════════════
+//  BEAM STOCK
+// ══════════════════════════════════════════════
+function renderBeams() {
+  const el = document.getElementById('beam-content');
+  if (!beams.length) { el.innerHTML=`<div class="empty"><div class="empty-ico">▣</div><p>No stock beams.<br>Click <strong>+ Add Beam</strong>.</p></div>`; return; }
+  let tM=0,tK=0,tA=0;
+  const rows = beams.map(b => {
+    const c=calcBeam(b); tM+=num(b.meters); tK+=c.kgs; tA+=c.amount;
+    return `<tr>
+      <td>${b.beamNo||'—'}</td>
+      <td><span class="badge b-gold" style="font-size:9px">${b.quality||'—'}</span></td>
+      <td class="dim">${b.party||'—'}</td>
+      <td class="dim" style="font-size:10px">${b.yarn||'—'}</td>
+      <td class="dim">${b.width||'—'} cm</td>
+      <td class="r dim">${fiI(b.ends)}</td>
+      <td class="r dim">${num(b.denier)}</td>
+      <td class="r gold">${fiI(b.meters)}</td>
+      <td class="r gold">${fi(c.kgs)}</td>
+      <td class="r dim">${num(b.rate)?'₹'+fi(num(b.rate),2):'—'}</td>
+      <td class="r">${fiC(c.amount)}</td>
+      <td><div style="display:flex;gap:3px">
+        <button class="btn btn-outline btn-sm btn-ico" onclick="openBeamModal('${b.id}')">✏</button>
+        <button class="btn btn-red btn-sm btn-ico" onclick="delBeam('${b.id}')">✕</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+  el.innerHTML = `<div class="tbox"><table>
+    <thead><tr>
+      <th>Beam No</th><th>Quality</th><th>Party</th><th>Yarn</th><th>Width</th>
+      <th class="r">Ends</th><th class="r">Denier</th>
+      <th class="r" style="color:var(--gold)">Meters</th>
+      <th class="r" style="color:var(--gold)">KGS</th>
+      <th class="r">Rate</th><th class="r">Amount</th><th></th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+    <tfoot><tr><td colspan="7">Total — ${beams.length} beams</td><td class="r">${fiI(tM)}</td><td class="r">${fi(tK)}</td><td></td><td class="r">${fiC(tA)}</td><td></td></tr></tfoot>
+  </table></div>`;
+}
+function delBeam(id) { if(!confirm('Remove?'))return; beams=beams.filter(b=>b.id!==id); KK.s('beams',beams); renderBeams(); }
+
+// ══════════════════════════════════════════════
+//  CLIENTS
+// ══════════════════════════════════════════════
+function renderClients() {
+  const el = document.getElementById('client-content');
+  if (!clients.length) { el.innerHTML=`<div class="empty"><div class="empty-ico">◉</div><p>No clients yet. Add job work clients to assign them to machines.</p></div>`; return; }
+  el.innerHTML = `<div class="cl-grid">${clients.map(c => {
+    const cLooms = looms.filter(l => l.client === c.id);
+    const cMeters = cLooms.reduce((s,l)=>s+Math.max(0,calcLoom(l).closing),0);
+    const isJW = c.type==='jw';
+    return `<div class="cl-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div>
+          <div class="cl-name">${c.name}</div>
+          <span class="badge ${isJW?'b-jw':'b-own'}">${isJW?'Job Work':'Own / Nakshatra'}</span>
+        </div>
+        <div style="display:flex;gap:3px">
+          <button class="btn btn-outline btn-sm btn-ico" onclick="openClientModal('${c.id}')">✏</button>
+          <button class="btn btn-red btn-sm btn-ico" onclick="delClient('${c.id}')">✕</button>
+        </div>
+      </div>
+      <div class="cl-row"><span class="cl-key">Active Machines</span><span class="cl-val" style="color:var(--gold)">${cLooms.length}</span></div>
+      <div class="cl-row"><span class="cl-key">Running Meters</span><span class="cl-val" style="color:var(--gold)">${fiI(cMeters)}</span></div>
+      ${c.contact?`<div class="cl-row"><span class="cl-key">Contact</span><span class="cl-val">${c.contact}</span></div>`:''}
+      ${c.phone?`<div class="cl-row"><span class="cl-key">Phone</span><span class="cl-val">${c.phone}</span></div>`:''}
+      ${c.rate?`<div class="cl-row"><span class="cl-key">Job Rate</span><span class="cl-val">₹${num(c.rate).toFixed(2)}/m</span></div>`:''}
+      ${c.notes?`<div style="font-size:10px;color:var(--text3);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">${c.notes}</div>`:''}
+    </div>`;
+  }).join('')}</div>`;
+}
+function delClient(id) { if(!confirm('Delete client?'))return; clients=clients.filter(c=>c.id!==id); KK.s('clients',clients); renderClients(); }
+
+// ══════════════════════════════════════════════
+//  RECIPE MASTER
+// ══════════════════════════════════════════════
+function renderRecipes() {
+  const el = document.getElementById('recipe-content');
+  if (!recipes.length) { el.innerHTML=`<div class="empty"><div class="empty-ico">≡</div><p>No recipes defined.</p></div>`; return; }
+  el.innerHTML = `<div class="rc-grid">${recipes.map(r => {
+    const w1w = wWt(num(r.rs),num(r.w1Denier),num(r.w1PPI));
+    const w2w = wWt(num(r.rs),num(r.w2Denier),num(r.w2PPI));
+    return `<div class="rc-card">
+      <div class="rc-actions">
+        <button class="btn btn-outline btn-sm btn-ico" onclick="openRecipeModal('${r.id}')">✏</button>
+        <button class="btn btn-red btn-sm btn-ico" onclick="delRecipe('${r.id}')">✕</button>
+      </div>
+      <div class="rc-name">${r.quality}</div>
+      <div class="rc-sku">${r.sku||'—'}</div>
+      <div class="rc-row"><span class="rc-k">Reed Space</span><span class="rc-v">${r.rs||'—'} cm</span></div>
+      <div class="rc-row"><span class="rc-k">Warp</span><span class="rc-v">${r.warpYarn||'—'} / ${r.ends||'—'} ends / ${r.denier||'—'} den</span></div>
+      <div class="rc-row"><span class="rc-k">W1 Yarn</span><span class="rc-v" style="color:var(--gold)">${r.w1Yarn||'—'}</span></div>
+      <div class="rc-row"><span class="rc-k">W1 Den/PPI</span><span class="rc-v">${num(r.w1Denier)||'—'} / ${num(r.w1PPI)||'—'}</span></div>
+      <div class="rc-row"><span class="rc-k">W1 Weight</span><span class="rc-v">${fi(w1w,3)} g/m</span></div>
+      ${r.w2Yarn?`
+      <div class="rc-row"><span class="rc-k">W2 Yarn</span><span class="rc-v" style="color:var(--gold)">${r.w2Yarn}</span></div>
+      <div class="rc-row"><span class="rc-k">W2 Den/PPI</span><span class="rc-v">${num(r.w2Denier)||'—'} / ${num(r.w2PPI)||'—'}</span></div>
+      <div class="rc-row"><span class="rc-k">W2 Weight</span><span class="rc-v">${fi(w2w,3)} g/m</span></div>`:''}
+    </div>`;
+  }).join('')}</div>`;
+}
+function delRecipe(id) { if(!confirm('Delete recipe?'))return; recipes=recipes.filter(r=>r.id!==id); KK.s('recipes',recipes); renderRecipes(); }
+function rmPreview() {
+  const rs=num(document.getElementById('rm-rs').value);
+  const d1=num(document.getElementById('rm-w1Denier').value);
+  const p1=num(document.getElementById('rm-w1PPI').value);
+  const d2=num(document.getElementById('rm-w2Denier').value);
+  const p2=num(document.getElementById('rm-w2PPI').value);
+  document.getElementById('rm-w1Wt').value = rs&&d1&&p1 ? fi(wWt(rs,d1,p1),3)+' g/m' : '';
+  document.getElementById('rm-w2Wt').value = rs&&d2&&p2 ? fi(wWt(rs,d2,p2),3)+' g/m' : '';
+}
+
+// ══════════════════════════════════════════════
+//  PIPES
+// ══════════════════════════════════════════════
+function renderPipes() {
+  const el = document.getElementById('pipe-content');
+  if (!pipes.length) { el.innerHTML=`<div class="empty"><div class="empty-ico">○</div><p>No parties added.</p></div>`; return; }
+  let t230=0,t280=0;
+  const rows = pipes.map(p => {
+    t230+=num(p.e230); t280+=num(p.e280);
+    return `<tr>
+      <td>${p.party||'—'}</td>
+      <td class="r"><input class="ci" type="number" value="${p.e230||0}" onchange="patchPipe('${p.id}','e230',this.value)" style="width:70px"></td>
+      <td class="r"><input class="ci" type="number" value="${p.e280||0}" onchange="patchPipe('${p.id}','e280',this.value)" style="width:70px"></td>
+      <td class="r gold">${num(p.e230)+num(p.e280)}</td>
+      <td><button class="btn btn-red btn-sm btn-ico" onclick="delPipe('${p.id}')">✕</button></td>
+    </tr>`;
+  }).join('');
+  el.innerHTML = `
+    <div class="cards mb16" style="max-width:460px">
+      <div class="card plain"><div class="c-label">Beams on M/C</div><div class="c-val">${looms.length}</div></div>
+      <div class="card plain"><div class="c-label">Empty 230 cm</div><div class="c-val">${t230}</div></div>
+      <div class="card plain"><div class="c-label">Empty 280 cm</div><div class="c-val">${t280}</div></div>
+      <div class="card gold"><div class="c-label">Total Pipes</div><div class="c-val">${t230+t280+looms.length}</div></div>
+    </div>
+    <div class="tbox" style="max-width:440px"><table>
+      <thead><tr><th>Party</th><th class="r">230 cm</th><th class="r">280 cm</th><th class="r" style="color:var(--gold)">Total Empty</th><th></th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr><td>Total</td><td class="r">${t230}</td><td class="r">${t280}</td><td class="r">${t230+t280}</td><td></td></tr></tfoot>
+    </table></div>`;
+}
+function patchPipe(id,f,v){const i=pipes.findIndex(p=>p.id===id);if(i>=0){pipes[i][f]=parseFloat(v)||0;KK.s('pipes',pipes);}}
+function delPipe(id){if(!confirm('Remove?'))return;pipes=pipes.filter(p=>p.id!==id);KK.s('pipes',pipes);renderPipes();}
+
+// ══════════════════════════════════════════════
+//  MODAL HELPERS
+// ══════════════════════════════════════════════
+const openModal  = id => document.getElementById(id).classList.add('open');
+const closeModal = id => document.getElementById(id).classList.remove('open');
+const bgClose    = (e, id) => { if (e.target.id===id) closeModal(id); };
+
+function fillSelect(selId, data, valFn, labelFn, cur='') {
+  const sel = document.getElementById(selId);
+  const prev = cur || sel.value;
+  const first = sel.options[0];
+  sel.innerHTML = '';
+  sel.appendChild(first);
+  data.forEach(d => {
+    const o = document.createElement('option');
+    o.value = valFn(d); o.textContent = labelFn(d);
+    if (o.value === prev) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
+// ══════════════════════════════════════════════
+//  LOOM MODAL
+// ══════════════════════════════════════════════
+function openLoomModal(id) {
+  fillSelect('lm-quality', recipes, r=>r.quality, r=>r.quality+(r.sku?' ('+r.sku+')':''), id ? looms.find(l=>l.id===id)?.quality : '');
+  fillSelect('lm-client', clients.filter(c=>c.type==='jw'), c=>c.id, c=>c.name, id ? looms.find(l=>l.id===id)?.client : '');
+  // Populate party datalist from all clients
+  const dl = document.getElementById('lm-party-list');
+  dl.innerHTML = clients.map(c=>'<option value="'+c.name+'">').join('');
+  document.getElementById('lm-title').textContent = id ? 'Edit Machine' : 'Add Machine';
+  document.getElementById('lm-id').value = id || '';
+  if (id) {
+    const l = looms.find(x=>x.id===id);
+    if (!l) return;
+    const fields = { 'lm-machNo':l.machNo, 'lm-beamNo':l.beamNo, 'lm-quality':l.quality,
+      'lm-panna':l.panna||2, 'lm-wtype':l.workType||'own', 'lm-client':l.client||'',
+      'lm-party':l.party||'', 'lm-warpYarn':l.warpYarn||'', 'lm-ends':l.ends||'',
+      'lm-denier':l.denier||'', 'lm-opBal':l.opBal||0, 'lm-mcBal':l.mcBal||0,
+      'lm-dayProd':l.dayProd||0, 'lm-nightProd':l.nightProd||0, 'lm-price':l.price||0,
+      'lm-date': l.date||new Date().toISOString().slice(0,10) };
+    Object.entries(fields).forEach(([k,v])=>{ const el=document.getElementById(k); if(el) el.value=v; });
+  } else {
+    ['lm-machNo','lm-beamNo','lm-warpYarn','lm-ends','lm-denier','lm-opBal','lm-mcBal','lm-dayProd','lm-nightProd','lm-price','lm-party'].forEach(f=>{document.getElementById(f).value='';});
+    document.getElementById('lm-quality').value='';
+    document.getElementById('lm-rp').style.display='none';
+    document.getElementById('lm-date').value=new Date().toISOString().slice(0,10);
+    document.getElementById('lm-panna').value='2';
+    document.getElementById('lm-wtype').value='own';
+    document.getElementById('lm-client').value='';
+  }
+  lmTypeToggle();
+  lmRecipeFill(); // show recipe preview immediately
+  openModal('loomModal');
+}
+function lmTypeToggle() {
+  const isJW = document.getElementById('lm-wtype').value==='jw';
+  document.getElementById('lm-clientWrap').style.display = isJW?'':'none';
+}
+function lmRecipeFill() {
+  const q  = document.getElementById('lm-quality').value;
+  const rp = document.getElementById('lm-rp');
+  const rec = recipes.find(r => r.quality === q);
+  if (!rec || !q) { rp.style.display = 'none'; return; }
+
+  // Only fill warp if recipe has the data — never clear manually entered values
+  if (rec.warpYarn) document.getElementById('lm-warpYarn').value = rec.warpYarn;
+  if (rec.ends)     document.getElementById('lm-ends').value     = rec.ends;
+  if (rec.denier)   document.getElementById('lm-denier').value   = rec.denier;
+
+  // Show weft preview
+  const w1w = wWt(num(rec.rs), num(rec.w1Denier), num(rec.w1PPI));
+  const w2w = wWt(num(rec.rs), num(rec.w2Denier), num(rec.w2PPI));
+  const warpMissing = !rec.warpYarn && !rec.ends && !rec.denier;
+  const pairs = [
+    ['Warp Yarn', rec.warpYarn || (warpMissing ? '⚠ Add in Recipe Master' : '—')],
+    ['Reed Space', rec.rs ? rec.rs+' cm' : '—'],
+    ['Ends', rec.ends||'—'],          ['Denier', rec.denier||'—'],
+    ['W1 Yarn', rec.w1Yarn||'—'],     ['W1 g/m', w1w ? fi(w1w,3) : '—'],
+  ];
+  if (rec.w2Yarn) pairs.push(['W2 Yarn', rec.w2Yarn], ['W2 g/m', w2w ? fi(w2w,3) : '—']);
+  document.getElementById('lm-rp-body').innerHTML = pairs
+    .map(([k,v]) => '<span style="color:var(--text3)">' + k + '</span><span style="color:var(--text)">' + v + '</span>')
+    .join('');
+  rp.style.display = 'block';
+}
+function saveLoom() {
+  const machNo = document.getElementById('lm-machNo').value;
+  const beamNo = document.getElementById('lm-beamNo').value.trim();
+  if (!machNo||!beamNo) { alert('M/C No. and Beam No. are required.'); return; }
+  const id = document.getElementById('lm-id').value || uid();
+  const wtype = document.getElementById('lm-wtype').value;
+  const loom = {
+    id, machNo:parseInt(machNo), beamNo, workType:wtype,
+    client: wtype==='jw' ? document.getElementById('lm-client').value : '',
+    panna:  parseInt(document.getElementById('lm-panna').value)||2,
+    party:  document.getElementById('lm-party').value.trim(),
+    quality:document.getElementById('lm-quality').value,
+    warpYarn:document.getElementById('lm-warpYarn').value.trim(),
+    ends:   parseFloat(document.getElementById('lm-ends').value)||0,
+    denier: parseFloat(document.getElementById('lm-denier').value)||0,
+    opBal:  parseFloat(document.getElementById('lm-opBal').value)||0,
+    mcBal:  parseFloat(document.getElementById('lm-mcBal').value)||0,
+    dayProd:parseFloat(document.getElementById('lm-dayProd').value)||0,
+    nightProd:parseFloat(document.getElementById('lm-nightProd').value)||0,
+    price:  parseFloat(document.getElementById('lm-price').value)||0,
+    date:   document.getElementById('lm-date').value||new Date().toISOString().slice(0,10)
+  };
+  const i = looms.findIndex(l=>l.id===id);
+  if (i>=0) looms[i]=loom; else looms.push(loom);
+  looms.sort((a,b)=>a.machNo-b.machNo);
+  KK.s('looms',looms);
+  closeModal('loomModal');
+  renderLooms();
+}
+
+// ══════════════════════════════════════════════
+//  BEAM MODAL
+// ══════════════════════════════════════════════
+function openBeamModal(id) {
+  document.getElementById('bm-title').textContent = id?'Edit Beam':'Add Stock Beam';
+  document.getElementById('bm-id').value = id||'';
+  if (id) {
+    const b = beams.find(x=>x.id===id); if(!b)return;
+    ['beamNo','quality','party','yarn','ends','denier','meters','rate'].forEach(f=>{document.getElementById('bm-'+f).value=b[f]??'';});
+    document.getElementById('bm-width').value=b.width||'230';
+    document.getElementById('bm-date').value=b.date||new Date().toISOString().slice(0,10);
+  } else {
+    ['bm-beamNo','bm-quality','bm-party','bm-yarn','bm-ends','bm-denier','bm-meters','bm-rate'].forEach(f=>document.getElementById(f).value='');
+    document.getElementById('bm-width').value='230';
+    document.getElementById('bm-date').value=new Date().toISOString().slice(0,10);
+  }
+  // populate datalists
+  document.getElementById('bm-party-list').innerHTML = clients.map(c=>'<option value="'+c.name+'">').join('');
+  document.getElementById('bm-quality-list').innerHTML = recipes.map(r=>'<option value="'+r.quality+'">').join('');
+  openModal('beamModal');
+}
+function saveBeam() {
+  const id=document.getElementById('bm-id').value||uid();
+  const beam={id,beamNo:document.getElementById('bm-beamNo').value.trim(),quality:document.getElementById('bm-quality').value.trim(),party:document.getElementById('bm-party').value.trim(),yarn:document.getElementById('bm-yarn').value.trim(),width:document.getElementById('bm-width').value,ends:parseFloat(document.getElementById('bm-ends').value)||0,denier:parseFloat(document.getElementById('bm-denier').value)||0,meters:parseFloat(document.getElementById('bm-meters').value)||0,rate:parseFloat(document.getElementById('bm-rate').value)||0,date:document.getElementById('bm-date').value||new Date().toISOString().slice(0,10)};
+  const i=beams.findIndex(b=>b.id===id);if(i>=0)beams[i]=beam;else beams.push(beam);
+  KK.s('beams',beams);closeModal('beamModal');renderBeams();
+}
+
+// ══════════════════════════════════════════════
+//  YARN MODAL
+// ══════════════════════════════════════════════
+function openYarnModal(id) {
+  document.getElementById('ym-title').textContent = id?'Edit Yarn Entry':'Add Yarn Entry';
+  document.getElementById('ym-id').value=id||'';
+  if(id){
+    const y=yarns.find(x=>x.id===id);if(!y)return;
+    ['quality','party','opBal','purchase','issue','rate'].forEach(f=>{document.getElementById('ym-'+f).value=y[f]??'';});
+    // restore TPM
+    const hasTpm=!!(y.tpmS||y.tpmZ);
+    document.getElementById('ym-tpm').checked=hasTpm;
+    document.getElementById('ym-tpm-fields').style.display=hasTpm?'block':'none';
+    if(hasTpm){document.getElementById('ym-tpmS').value=y.tpmS||0;document.getElementById('ym-tpmZ').value=y.tpmZ||0;tpmSum();}
+  } else {
+    ['ym-quality','ym-party','ym-opBal','ym-purchase','ym-issue','ym-rate'].forEach(f=>document.getElementById(f).value='');
+    document.getElementById('ym-tpm').checked=false;
+    document.getElementById('ym-tpm-fields').style.display='none';
+    document.getElementById('ym-tpmS').value='';document.getElementById('ym-tpmZ').value='';document.getElementById('ym-tpmTotal').value='';
+  }
+  // populate party datalist
+  document.getElementById('ym-party-list').innerHTML = clients.map(c=>'<option value="'+c.name+'">').join('');
+  openModal('yarnModal');
+}
+function tpmToggle(){
+  const on=document.getElementById('ym-tpm').checked;
+  document.getElementById('ym-tpm-fields').style.display=on?'block':'none';
+  if(!on){document.getElementById('ym-tpmS').value='';document.getElementById('ym-tpmZ').value='';document.getElementById('ym-tpmTotal').value='';}
+}
+function tpmSum(){
+  const s=parseFloat(document.getElementById('ym-tpmS').value)||0;
+  const z=parseFloat(document.getElementById('ym-tpmZ').value)||0;
+  const tot=s+z;
+  document.getElementById('ym-tpmTotal').value=tot?tot.toFixed(3):'';
+  document.getElementById('ym-purchase').value=tot||'';
+}
+
+function saveYarn(){
+  const q=document.getElementById('ym-quality').value.trim();
+  const p=document.getElementById('ym-party').value.trim();
+  if(!q||!p){alert('Quality and party required.');return;}
+  const id=document.getElementById('ym-id').value||uid();
+  const isTpm=document.getElementById('ym-tpm').checked;
+  const tpmS=isTpm?(parseFloat(document.getElementById('ym-tpmS').value)||0):0;
+  const tpmZ=isTpm?(parseFloat(document.getElementById('ym-tpmZ').value)||0):0;
+  const purchase=isTpm?(tpmS+tpmZ):(parseFloat(document.getElementById('ym-purchase').value)||0);
+  const yarn={id,quality:q,party:p,tpm:isTpm,tpmS,tpmZ,
+    opBal:parseFloat(document.getElementById('ym-opBal').value)||0,
+    purchase,
+    issue:parseFloat(document.getElementById('ym-issue').value)||0,
+    rate:parseFloat(document.getElementById('ym-rate').value)||0};
+  const i=yarns.findIndex(y=>y.id===id);if(i>=0)yarns[i]=yarn;else yarns.push(yarn);
+  KK.s('yarns',yarns);closeModal('yarnModal');renderYarn();
+}
+
+// ══════════════════════════════════════════════
+//  CLIENT MODAL
+// ══════════════════════════════════════════════
+function openClientModal(id) {
+  document.getElementById('cm-title').textContent=id?'Edit Client':'Add Client';
+  document.getElementById('cm-id').value=id||'';
+  if(id){
+    const c=clients.find(x=>x.id===id);if(!c)return;
+    ['name','type','contact','phone','rate','notes'].forEach(f=>{document.getElementById('cm-'+f).value=c[f]??'';});
+  } else { ['cm-name','cm-contact','cm-phone','cm-rate','cm-notes'].forEach(f=>document.getElementById(f).value=''); document.getElementById('cm-type').value='jw'; }
+  openModal('clientModal');
+}
+function saveClient(){
+  const name=document.getElementById('cm-name').value.trim();if(!name){alert('Name required.');return;}
+  const id=document.getElementById('cm-id').value||uid();
+  const client={id,name,type:document.getElementById('cm-type').value,contact:document.getElementById('cm-contact').value.trim(),phone:document.getElementById('cm-phone').value.trim(),rate:parseFloat(document.getElementById('cm-rate').value)||0,notes:document.getElementById('cm-notes').value.trim()};
+  const i=clients.findIndex(c=>c.id===id);if(i>=0)clients[i]=client;else clients.push(client);
+  KK.s('clients',clients);closeModal('clientModal');renderClients();
+}
+
+// ══════════════════════════════════════════════
+//  RECIPE MODAL
+// ══════════════════════════════════════════════
+function openRecipeModal(id) {
+  document.getElementById('rm-title').textContent=id?'Edit Recipe':'Add Quality Recipe';
+  document.getElementById('rm-id').value=id||'';
+  if(id){
+    const r=recipes.find(x=>x.id===id);if(!r)return;
+    ['quality','sku','rs','warpYarn','ends','denier','w1Yarn','w1Denier','w1PPI','w2Yarn','w2Denier','w2PPI'].forEach(f=>{document.getElementById('rm-'+f).value=r[f]??'';});
+    rmPreview();
+  } else { ['rm-quality','rm-sku','rm-rs','rm-warpYarn','rm-ends','rm-denier','rm-w1Yarn','rm-w1Denier','rm-w1PPI','rm-w2Yarn','rm-w2Denier','rm-w2PPI','rm-w1Wt','rm-w2Wt'].forEach(f=>document.getElementById(f).value=''); }
+  openModal('recipeModal');
+}
+function saveRecipe(){
+  const quality=document.getElementById('rm-quality').value.trim();if(!quality){alert('Quality name required.');return;}
+  const id=document.getElementById('rm-id').value||uid();
+  const rec={id,quality,sku:document.getElementById('rm-sku').value.trim(),rs:parseFloat(document.getElementById('rm-rs').value)||0,warpYarn:document.getElementById('rm-warpYarn').value.trim(),ends:parseFloat(document.getElementById('rm-ends').value)||0,denier:parseFloat(document.getElementById('rm-denier').value)||0,w1Yarn:document.getElementById('rm-w1Yarn').value.trim(),w1Denier:parseFloat(document.getElementById('rm-w1Denier').value)||0,w1PPI:parseFloat(document.getElementById('rm-w1PPI').value)||0,w2Yarn:document.getElementById('rm-w2Yarn').value.trim(),w2Denier:parseFloat(document.getElementById('rm-w2Denier').value)||0,w2PPI:parseFloat(document.getElementById('rm-w2PPI').value)||0};
+  const i=recipes.findIndex(r=>r.id===id);if(i>=0)recipes[i]=rec;else recipes.push(rec);
+  KK.s('recipes',recipes);closeModal('recipeModal');renderRecipes();
+}
+
+// ══════════════════════════════════════════════
+//  PIPE MODAL
+// ══════════════════════════════════════════════
+function openPipeModal(id){
+  document.getElementById('pm-id').value=id||'';
+  document.getElementById('pm-party-list').innerHTML=clients.map(c=>'<option value="'+c.name+'">').join('');
+  if(id){const p=pipes.find(x=>x.id===id);if(!p)return;document.getElementById('pm-party').value=p.party||'';document.getElementById('pm-e230').value=p.e230||0;document.getElementById('pm-e280').value=p.e280||0;}
+  else{['pm-party','pm-e230','pm-e280'].forEach(f=>document.getElementById(f).value='');}
+  openModal('pipeModal');
+}
+function savePipe(){
+  const party=document.getElementById('pm-party').value.trim();if(!party){alert('Party required.');return;}
+  const id=document.getElementById('pm-id').value||uid();
+  const pipe={id,party,e230:parseFloat(document.getElementById('pm-e230').value)||0,e280:parseFloat(document.getElementById('pm-e280').value)||0};
+  const i=pipes.findIndex(p=>p.id===id);if(i>=0)pipes[i]=pipe;else pipes.push(pipe);
+  KK.s('pipes',pipes);closeModal('pipeModal');renderPipes();
+}
+
+function toggleWeftCons(btn) {
+  const body = document.getElementById('weft-cons-body');
+  if (!body) return;
+  const collapsed = body.style.display === 'none';
+  body.style.display = collapsed ? '' : 'none';
+  btn.textContent = collapsed ? '▲ Collapse' : '▼ Expand';
+}
+
+// ══════════════════════════════════════════════
+//  IMPORT / EXPORT
+// ══════════════════════════════════════════════
+function doExport(){
+  const d={recipes,looms,beams,yarns,clients,pipes,at:new Date().toISOString(),v:3};
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));
+  a.download='karkhana_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+}
+function doImport(e){
+  const f=e.target.files[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(d.recipes){recipes=d.recipes;KK.s('recipes',recipes);}
+      if(d.looms){looms=d.looms;KK.s('looms',looms);}
+      if(d.beams){beams=d.beams;KK.s('beams',beams);}
+      if(d.yarns){yarns=d.yarns;KK.s('yarns',yarns);}
+      if(d.clients){clients=d.clients;KK.s('clients',clients);}
+      if(d.pipes){pipes=d.pipes;KK.s('pipes',pipes);}
+      render(activeTab);alert('Restored successfully.');
+    }catch{alert('Invalid backup file.');}
+  };
+  reader.readAsText(f);e.target.value='';
+}
+
+// ══════════════════════════════════════════════
+//  SEED DATA
+// ══════════════════════════════════════════════
+function seed(){}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+const _d = new Date();
+const _days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const _months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+// ── LOOM TABLE KEYBOARD NAVIGATION ──
+// Down/Up arrow jumps between same column across rows, like a spreadsheet
+document.addEventListener('keydown', function(e) {
+  if (!e.target.classList.contains('ci')) return;
+  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+  e.preventDefault();
+  // collect all .ci inputs in document order
+  const allCi = Array.from(document.querySelectorAll('.ci'));
+  const idx = allCi.indexOf(e.target);
+  if (idx === -1) return;
+  // figure out column position within its row
+  const row = e.target.closest('tr');
+  const rowCis = Array.from(row.querySelectorAll('.ci'));
+  const colIdx = rowCis.indexOf(e.target);
+  // find next/prev row in tbody
+  const tbody = row.closest('tbody');
+  if (!tbody) return;
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  const rowIdx = rows.indexOf(row);
+  const targetRowIdx = e.key === 'ArrowDown' ? rowIdx + 1 : rowIdx - 1;
+  if (targetRowIdx < 0 || targetRowIdx >= rows.length) return;
+  const targetCis = Array.from(rows[targetRowIdx].querySelectorAll('.ci'));
+  const targetInput = targetCis[Math.min(colIdx, targetCis.length - 1)];
+  if (targetInput) { targetInput.focus(); targetInput.select(); }
+});
+
+document.getElementById('dateDisplay').innerHTML =
+  '<span style="color:var(--text3);font-size:9px;letter-spacing:.5px">' + _days[_d.getDay()] + '</span>' +
+  ' <strong>' + _d.getDate() + ' ' + _months[_d.getMonth()] + ' ' + _d.getFullYear() + '</strong>';
+seed();
+sbInit();
+sbPull().then(() => { if (!_sb) renderDash(); });
+if (!_sb) renderDash(); // render immediately if no Supabase config yet
+
+</script>
+<!-- HISTORY MODAL -->
+<div id="historyModal" class="overlay" onclick="bgClose(event,'historyModal')">
+<div class="modal" style="max-width:900px">
+  <div class="mhd">
+    <div>
+      <div class="mtitle">Loom History</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px">Snapshot saved every time you Roll to Next Day</div>
+    </div>
+    <button class="xbtn" onclick="closeModal('historyModal')">✕</button>
+  </div>
+  <div class="mbody">
+    <div id="history-date-row" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
+    <div id="history-table"></div>
+  </div>
+</div>
+</div>
+
+</body>
+</html>
