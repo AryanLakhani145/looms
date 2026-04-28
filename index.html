@@ -232,7 +232,9 @@ td .panna-sel{font-family:'IBM Plex Mono';font-size:11px;background:transparent;
 td .panna-sel:focus{outline:none;border-color:var(--gold);color:var(--text)}
 [data-theme=light] td .panna-sel{background:transparent}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <div class="app">
@@ -569,57 +571,68 @@ applyTheme(theme);
 //  STORE
 // ══════════════════════════════════════════════
 // ══════════════════════════════════════════════
-//  SUPABASE CONFIG — paste your project URL and anon key here
+//  FIREBASE CONFIG
 // ══════════════════════════════════════════════
-const SB_URL = 'YOUR_SUPABASE_URL';   // e.g. https://xxxx.supabase.co
-const SB_KEY = 'YOUR_SUPABASE_ANON_KEY'; // Settings → API → anon public
+const firebaseConfig = {
+  apiKey: "AIzaSyCq1BLyd65dInCZep1gUqmOVd-2glaSfhA",
+  authDomain: "karkhana-tool.firebaseapp.com",
+  projectId: "karkhana-tool",
+  storageBucket: "karkhana-tool.firebasestorage.app",
+  messagingSenderId: "25287165770",
+  appId: "1:25287165770:web:dc7ed7eb42ef0452c3e3b3"
+};
 
-let _sb = null;
-function sbInit() {
-  if (SB_URL.startsWith('YOUR') || SB_KEY.startsWith('YOUR')) return;
-  try { _sb = supabase.createClient(SB_URL, SB_KEY); } catch(e) { console.warn('Supabase init failed', e); }
-}
+let _db = null;
 
-function sbSync(label) {
-  const el = document.getElementById('syncBadge');
-  if (el) { el.textContent = label; el.style.display = 'inline'; }
-}
-
-async function sbPush(k, v) {
-  if (!_sb) return;
+function fbInit() {
   try {
-    await _sb.from('kk_store').upsert({ key: k, value: v }, { onConflict: 'key' });
-    sbSync('✓ synced');
-    setTimeout(() => { const el = document.getElementById('syncBadge'); if(el) el.style.display='none'; }, 2000);
-  } catch(e) { sbSync('⚠ offline'); }
+    firebase.initializeApp(firebaseConfig);
+    _db = firebase.firestore();
+    console.log("Firebase connected ✓");
+  } catch(e) { console.warn("Firebase init failed", e); }
 }
 
-async function sbPull() {
-  if (!_sb) return;
-  sbSync('⟳ syncing…');
+function fbSync(label) {
+  const el = document.getElementById("syncBadge");
+  if (el) { el.textContent = label; el.style.display = "inline"; }
+}
+
+async function fbPush(k, v) {
+  if (!_db) return;
   try {
-    const { data, error } = await _sb.from('kk_store').select('key,value');
-    if (error || !data || !data.length) { sbSync('⚠ offline'); return; }
-    data.forEach(row => localStorage.setItem('kk2_'+row.key, JSON.stringify(row.value)));
-    // reload in-memory variables from freshly synced localStorage
-    recipes = KK.g('recipes', []);
-    looms   = KK.g('looms', []);
-    beams   = KK.g('beams', []);
-    yarns   = KK.g('yarns', []);
-    clients = KK.g('clients', []);
-    pipes   = KK.g('pipes', []);
-    sbSync('✓ synced');
-    setTimeout(() => { const el = document.getElementById('syncBadge'); if(el) el.style.display='none'; }, 2000);
+    await _db.collection("kk_store").doc(k).set({ value: v, updated_at: new Date() });
+    fbSync("✓ synced");
+    setTimeout(() => { const el = document.getElementById("syncBadge"); if(el) el.style.display="none"; }, 2000);
+  } catch(e) { fbSync("⚠ offline"); console.error("fbPush error", e); }
+}
+
+async function fbPull() {
+  if (!_db) return;
+  fbSync("⟳ syncing…");
+  try {
+    const snap = await _db.collection("kk_store").get();
+    if (snap.empty) { fbSync("● no data yet"); setTimeout(()=>{const el=document.getElementById("syncBadge");if(el)el.style.display="none";},2000); return; }
+    snap.forEach(doc => {
+      localStorage.setItem("kk2_"+doc.id, JSON.stringify(doc.data().value));
+    });
+    recipes = KK.g("recipes", []);
+    looms   = KK.g("looms", []);
+    beams   = KK.g("beams", []);
+    yarns   = KK.g("yarns", []);
+    clients = KK.g("clients", []);
+    pipes   = KK.g("pipes", []);
+    fbSync("✓ synced");
+    setTimeout(() => { const el = document.getElementById("syncBadge"); if(el) el.style.display="none"; }, 2000);
     render(activeTab);
-  } catch(e) { sbSync('⚠ offline'); }
+  } catch(e) { fbSync("⚠ offline"); console.error("fbPull error", e); }
 }
 
 // ══════════════════════════════════════════════
-//  STORE (localStorage + Supabase write-through)
+//  STORE (localStorage write-through to Firebase)
 // ══════════════════════════════════════════════
 const KK = {
-  g: (k, d) => { try { return JSON.parse(localStorage.getItem('kk2_'+k)) ?? d; } catch { return d; } },
-  s: (k, v) => { localStorage.setItem('kk2_'+k, JSON.stringify(v)); sbPush(k, v); }
+  g: (k, d) => { try { return JSON.parse(localStorage.getItem("kk2_"+k)) ?? d; } catch { return d; } },
+  s: (k, v) => { localStorage.setItem("kk2_"+k, JSON.stringify(v)); fbPush(k, v); }
 };
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,5);
 const num = v => { const x = parseFloat(v); return isNaN(x) ? 0 : x; };
@@ -1811,9 +1824,9 @@ document.getElementById('dateDisplay').innerHTML =
   '<span style="color:var(--text3);font-size:9px;letter-spacing:.5px">' + _days[_d.getDay()] + '</span>' +
   ' <strong>' + _d.getDate() + ' ' + _months[_d.getMonth()] + ' ' + _d.getFullYear() + '</strong>';
 seed();
-sbInit();
-sbPull().then(() => { if (!_sb) renderDash(); });
-if (!_sb) renderDash(); // render immediately if no Supabase config yet
+fbInit();
+renderDash(); // render from localStorage immediately
+fbPull();     // then sync from Firebase in background
 
 </script>
 <!-- HISTORY MODAL -->
