@@ -295,6 +295,14 @@ td .panna-sel:focus{outline:none;border-color:var(--gold);color:var(--text)}
         <button class="btn btn-gold" onclick="openLoomModal(null)">+ Add Machine</button>
       </div>
     </div>
+    <!-- Global entry date bar -->
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0 4px;margin-bottom:4px;flex-wrap:wrap">
+      <span style="font-family:'IBM Plex Mono';font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text3)">Entry Date</span>
+      <input type="date" id="loomGlobalDate" class="fi" style="width:155px;padding:5px 10px;font-size:12px" onchange="updateLoomDates(this.value)">
+      <button class="btn btn-gold" onclick="saveDayEntry()" style="font-size:11px;letter-spacing:.3px">✓ Save Entry</button>
+      <span style="font-family:'IBM Plex Mono';font-size:10px;color:var(--text3)" id="loomDateLabel"></span>
+      <span id="entrySaveStatus" style="font-family:'IBM Plex Mono';font-size:10px;display:none"></span>
+    </div>
     <div id="loom-content"></div>
   </div>
 
@@ -397,7 +405,6 @@ td .panna-sel:focus{outline:none;border-color:var(--gold);color:var(--text)}
       <div class="fg"><label class="lbl">Day Production (m)</label><input class="fi" id="lm-dayProd" type="number" placeholder="0"></div>
       <div class="fg"><label class="lbl">Night Production (m)</label><input class="fi" id="lm-nightProd" type="number" placeholder="0"></div>
       <div class="fg"><label class="lbl">Rate ₹/m</label><input class="fi" id="lm-price" type="number" step="0.01" placeholder="0"></div>
-      <div class="fg"><label class="lbl">Entry Date</label><input class="fi" id="lm-date" type="date"></div>
     </div>
   </div>
   <div class="mfoot">
@@ -714,7 +721,7 @@ function switchTab(id) {
 }
 function render(id) {
   if (id==='dash')    renderDash();
-  else if (id==='looms')   renderLooms();
+  else if (id==='looms')   { renderLooms(); initGlobalDate(); }
   else if (id==='beams')   renderBeams();
   else if (id==='yarn')    renderYarn();
   else if (id==='clients') renderClients();
@@ -1529,13 +1536,12 @@ function openLoomModal(id) {
       'lm-party':l.party||'', 'lm-warpYarn':l.warpYarn||'', 'lm-ends':l.ends||'',
       'lm-denier':l.denier||'', 'lm-opBal':l.opBal||0, 'lm-mcBal':l.mcBal||0,
       'lm-dayProd':l.dayProd||0, 'lm-nightProd':l.nightProd||0, 'lm-price':l.price||0,
-      'lm-date': l.date||new Date().toISOString().slice(0,10) };
+      }; // date handled globally via loomGlobalDate
     Object.entries(fields).forEach(([k,v])=>{ const el=document.getElementById(k); if(el) el.value=v; });
   } else {
     ['lm-machNo','lm-beamNo','lm-warpYarn','lm-ends','lm-denier','lm-opBal','lm-mcBal','lm-dayProd','lm-nightProd','lm-price','lm-party'].forEach(f=>{document.getElementById(f).value='';});
     document.getElementById('lm-quality').value='';
     document.getElementById('lm-rp').style.display='none';
-    document.getElementById('lm-date').value=new Date().toISOString().slice(0,10);
     document.getElementById('lm-panna').value='2';
     document.getElementById('lm-wtype').value='own';
     document.getElementById('lm-client').value='';
@@ -1595,7 +1601,7 @@ function saveLoom() {
     dayProd:parseFloat(document.getElementById('lm-dayProd').value)||0,
     nightProd:parseFloat(document.getElementById('lm-nightProd').value)||0,
     price:  parseFloat(document.getElementById('lm-price').value)||0,
-    date:   document.getElementById('lm-date').value||new Date().toISOString().slice(0,10)
+    date:   document.getElementById('loomGlobalDate').value||new Date().toISOString().slice(0,10)
   };
   const i = looms.findIndex(l=>l.id===id);
   if (i>=0) looms[i]=loom; else looms.push(loom);
@@ -1745,6 +1751,72 @@ function savePipe(){
   const pipe={id,party,e230:parseFloat(document.getElementById('pm-e230').value)||0,e280:parseFloat(document.getElementById('pm-e280').value)||0};
   const i=pipes.findIndex(p=>p.id===id);if(i>=0)pipes[i]=pipe;else pipes.push(pipe);
   KK.s('pipes',pipes);closeModal('pipeModal');renderPipes();
+}
+
+// Update date label and store preference
+function saveDayEntry() {
+  if (!looms.length) { alert("No machines to save."); return; }
+  const date = document.getElementById("loomGlobalDate").value || new Date().toISOString().slice(0,10);
+
+  // Build snapshot identical to rollToNextDay format
+  const snap = {
+    date,
+    label: (() => {
+      const d = new Date(date + "T00:00:00");
+      const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      return days[d.getDay()] + " " + d.getDate() + " " + months[d.getMonth()] + " " + d.getFullYear();
+    })(),
+    rows: looms.map(l => {
+      const c = calcLoom(l);
+      return {
+        machNo: l.machNo, beamNo: l.beamNo,
+        party: l.party||"", quality: l.quality||"",
+        workType: l.workType, client: getClientName(l.client)||"",
+        panna: l.panna||2,
+        opBal: num(l.opBal), mcBal: num(l.mcBal),
+        diff: c.diff, dayProd: num(l.dayProd), nightProd: num(l.nightProd),
+        closing: c.closing, bfDays: c.bfDays, waKgs: c.waKgs,
+        w1Yarn: c.w1Yarn, w1Cons: c.w1Cons,
+        w2Yarn: c.w2Yarn, w2Cons: c.w2Cons
+      };
+    })
+  };
+
+  // Save to history (replace if same date exists)
+  let history = KK.g("history", []);
+  history = history.filter(h => h.date !== date);
+  history.unshift(snap);
+  if (history.length > 60) history = history.slice(0, 60);
+  KK.s("history", history);
+
+  // Show confirmation
+  const st = document.getElementById("entrySaveStatus");
+  if (st) {
+    st.textContent = "✓ Saved — " + snap.label;
+    st.style.color = "var(--green-bright)";
+    st.style.display = "inline";
+    setTimeout(() => { st.style.display = "none"; }, 3000);
+  }
+}
+
+function updateLoomDates(val) {
+  const label = document.getElementById("loomDateLabel");
+  if (!label) return;
+  const d = new Date(val + "T00:00:00");
+  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  label.textContent = days[d.getDay()] + " " + d.getDate() + " " + months[d.getMonth()] + " " + d.getFullYear();
+  localStorage.setItem("kk_loomDate", val);
+}
+
+function initGlobalDate() {
+  const el = document.getElementById("loomGlobalDate");
+  if (!el) return;
+  const saved = localStorage.getItem("kk_loomDate");
+  const today = new Date().toISOString().slice(0,10);
+  el.value = saved || today;
+  updateLoomDates(el.value);
 }
 
 function toggleWeftCons(btn) {
