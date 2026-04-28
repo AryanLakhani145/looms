@@ -754,10 +754,20 @@ function renderDash() {
       return da - db;
     });
 
+  // Merge beam stock into existing quality rows (same key = quality only)
   beams.forEach(b => {
-    const qk = (b.quality||'?')+'||Stock';
-    qualMap[qk] = qualMap[qk] || { quality:b.quality||'?', label:'Beam Stock', running:0, stock:0 };
-    qualMap[qk].stock += num(b.meters);
+    const bq = b.quality||'?';
+    // find any existing entry for this quality and add stock to it
+    // if multiple client rows exist for same quality, add to the first one found
+    const existingKey = Object.keys(qualMap).find(k => k.startsWith(bq+'||'));
+    if (existingKey) {
+      qualMap[existingKey].stock += num(b.meters);
+    } else {
+      // no loom running this quality — create a stock-only row
+      const qk = bq+'||Stock';
+      qualMap[qk] = qualMap[qk] || { quality:bq, label:'Beam Stock only', running:0, stock:0 };
+      qualMap[qk].stock += num(b.meters);
+    }
   });
 
   // beam fall table
