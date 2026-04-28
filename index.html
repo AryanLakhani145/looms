@@ -297,6 +297,9 @@ td .panna-sel:focus{outline:none;border-color:var(--gold);color:var(--text)}
   /* Keep: M/C, Beam, Quality, Op Bal, MC Bal, Day, Night, Closing, B/F */
 }
 
+.weft-agg-grid{grid-template-columns:1fr !important}
+#dash-weft-grid{grid-template-columns:1fr !important}
+
 @media(max-width:480px){
   .cards{grid-template-columns:1fr 1fr}
   .c-val{font-size:16px}
@@ -392,7 +395,10 @@ td .panna-sel:focus{outline:none;border-color:var(--gold);color:var(--text)}
   <div id="panel-yarn" class="panel">
     <div class="sec-hdr">
       <div class="sec-title">Weft Yarn Stock</div>
-      <div><button class="btn btn-gold" onclick="openYarnModal(null)">+ Add Entry</button></div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-amber" onclick="rollYarnStock()">↺ Roll Yarn Stock</button>
+        <button class="btn btn-gold" onclick="openYarnModal(null)">+ Add Entry</button>
+      </div>
     </div>
     <div id="yarn-content"></div>
   </div>
@@ -524,7 +530,14 @@ td .panna-sel:focus{outline:none;border-color:var(--gold);color:var(--text)}
     <div class="form-grid">
       <div class="fg"><label class="lbl">Yarn Quality *</label><input class="fi" id="ym-quality" placeholder="120/30"></div>
       <div class="fg"><label class="lbl">Party / Supplier *</label><input class="fi" id="ym-party" placeholder="Nakkashi" list="ym-party-list" autocomplete="off"><datalist id="ym-party-list"></datalist></div>
-      <div class="fg"><label class="lbl">Opening Balance (kg)</label><input class="fi" id="ym-opBal" type="number" step="0.001" placeholder="0"></div>
+      <div class="fg">
+        <label class="lbl">Opening Balance (kg)</label>
+        <div style="display:flex;gap:6px;align-items:center">
+          <input class="fi" id="ym-opBal" type="number" step="0.001" placeholder="0" style="flex:1">
+          <button type="button" id="ym-useClosing" class="btn btn-outline btn-sm" onclick="useClosingAsOpening()" style="display:none;white-space:nowrap;font-size:10px" title="Set opening = previous closing balance">← Use closing</button>
+        </div>
+        <div id="ym-prev-closing" style="font-family:'IBM Plex Mono';font-size:10px;color:var(--text3);margin-top:3px;display:none"></div>
+      </div>
       <div class="fg"><label class="lbl">Purchase (kg)</label><input class="fi" id="ym-purchase" type="number" step="0.001" placeholder="0"></div>
       <div class="fg"><label class="lbl">Issue / Used (kg)</label><input class="fi" id="ym-issue" type="number" step="0.001" placeholder="0"></div>
       <div class="fg"><label class="lbl">Rate ₹/kg</label><input class="fi" id="ym-rate" type="number" step="0.01" placeholder="0"></div>
@@ -943,7 +956,82 @@ function renderDash() {
         </div>
       </div>
     </div>
+    <div style="margin-top:16px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" id="dash-weft-grid">
+        <div>
+          <div class="sec-title mb8" style="font-size:17px">Weft — Stock vs Required</div>
+          <div class="tbox" id="dash-weft-sd"></div>
+        </div>
+        <div>
+          <div class="sec-title mb8" style="font-size:17px">Party × Yarn Stock</div>
+          <div class="tbox" id="dash-weft-py"></div>
+        </div>
+      </div>
+    </div>
   `;
+
+  // Build weft tables separately (avoids template literal nesting issues)
+  buildDashWeft();
+}
+
+function buildDashWeft() {
+  const sdEl = document.getElementById('dash-weft-sd');
+  const pyEl = document.getElementById('dash-weft-py');
+  if (!sdEl || !pyEl) return;
+
+  // Required from loom consumption
+  const req = {};
+  looms.forEach(l => {
+    const c = calcLoom(l);
+    if (c.w1Yarn && c.w1Cons > 0) req[c.w1Yarn] = (req[c.w1Yarn]||0) + c.w1Cons;
+    if (c.w2Yarn && c.w2Cons > 0) req[c.w2Yarn] = (req[c.w2Yarn]||0) + c.w2Cons;
+  });
+
+  // Surplus / deficit
+  const sdRows = Object.entries(req).length
+    ? Object.entries(req).map(([yarn, needed]) => {
+        const match = yarns.find(y => fuzzyMatch(yarn, y.quality));
+        const stock = match ? num(match.opBal)+num(match.purchase)-num(match.issue) : null;
+        const def = stock !== null ? stock - needed : null;
+        const badge = def === null
+          ? '<span class="badge b-dim">—</span>'
+          : def < 0
+            ? '<span class="badge b-red">⚠ ' + fi(def,2) + '</span>'
+            : '<span class="badge b-green">+' + fi(def,2) + '</span>';
+        return '<tr><td class="text-mono" style="font-size:10px">' + yarn + '</td>'
+          + '<td class="r gold">' + fi(needed,2) + '</td>'
+          + '<td class="r ' + (stock!==null?'':'dim') + '">' + (stock!==null?fi(stock,2):'—') + '</td>'
+          + '<td>' + badge + '</td></tr>';
+      }).join('')
+    : '<tr><td colspan="4" style="text-align:center;padding:16px;color:var(--text3)">No consumption data yet</td></tr>';
+
+  sdEl.innerHTML = '<table><thead><tr>'
+    + '<th>Yarn</th><th class="r">Required (kg)</th><th class="r">Stock (kg)</th><th>Surplus / Deficit</th>'
+    + '</tr></thead><tbody>' + sdRows + '</tbody></table>';
+
+  // Party × yarn stock
+  const partyStock = {};
+  yarns.forEach(y => {
+    const bal = num(y.opBal)+num(y.purchase)-num(y.issue);
+    const key = (y.party||'—') + '||' + (y.quality||'—');
+    partyStock[key] = partyStock[key] || { party:y.party||'—', yarn:y.quality||'—', stock:0, rate:num(y.rate) };
+    partyStock[key].stock += bal;
+  });
+
+  const pyRows = Object.values(partyStock).length
+    ? Object.values(partyStock)
+        .sort((a,b) => a.party.localeCompare(b.party))
+        .map(r => '<tr>'
+          + '<td class="dim">' + r.party + '</td>'
+          + '<td class="text-mono" style="font-size:10px">' + r.yarn + '</td>'
+          + '<td class="r gold">' + fi(r.stock,2) + '</td>'
+          + '<td class="r dim">' + (r.rate ? '₹'+fi(r.rate,2) : '—') + '</td>'
+          + '</tr>').join('')
+    : '<tr><td colspan="4" style="text-align:center;padding:16px;color:var(--text3)">No yarn stock</td></tr>';
+
+  pyEl.innerHTML = '<table><thead><tr>'
+    + '<th>Party</th><th>Yarn</th><th class="r">Balance (kg)</th><th class="r">Rate</th>'
+    + '</tr></thead><tbody>' + pyRows + '</tbody></table>';
 }
 
 // ══════════════════════════════════════════════
@@ -1015,79 +1103,9 @@ function renderLooms() {
     </tr>`;
   }).join('');
 
-  // Mobile card view
-  const isMobile = window.innerWidth <= 768;
-  const mobileCards = sorted.map(l => {
-    const c = calcLoom(l);
-    const isJW = l.workType === 'jw';
-    const bfCls = c.bfDays > 0 && c.bfDays <= 10 ? 'b-red' : c.bfDays <= 20 ? 'b-amber' : 'b-green';
-    const diffCls = Math.abs(c.diff) > 20 ? 'diff-bad' : Math.abs(c.diff) > 8 ? 'diff-warn' : 'diff-ok';
-    return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px;position:relative">
-      <!-- card header -->
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-        <div>
-          <span style="font-family:'IBM Plex Mono';font-size:13px;font-weight:500;color:var(--text)">M/C ${l.machNo}</span>
-          <span style="font-family:'IBM Plex Mono';font-size:11px;color:var(--text3);margin-left:6px">${l.beamNo||'—'}</span>
-          <br>
-          <span class="badge b-gold" style="font-size:9px;margin-top:4px">${l.quality||'—'}</span>
-          <span class="badge ${isJW?'b-jw':'b-own'}" style="font-size:9px;margin-left:4px">${isJW?(getClientName(l.client)||'JW'):'Own'}</span>
-          ${c.bfDays>0?`<span class="badge ${bfCls}" style="font-size:9px;margin-left:4px">${c.bfDays.toFixed(1)}d</span>`:''}
-        </div>
-        <div style="display:flex;gap:4px">
-          <button class="btn btn-outline btn-sm btn-ico" onclick="openLoomModal('${l.id}')">✏</button>
-          <button class="btn btn-red btn-sm btn-ico" onclick="delLoom('${l.id}')">✕</button>
-        </div>
-      </div>
-      <!-- editable fields row -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-        <div>
-          <div style="font-family:'IBM Plex Mono';font-size:9px;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px">Op Balance</div>
-          <input class="ci" type="number" value="${l.opBal||0}" onchange="patch('${l.id}','opBal',this.value)" style="width:100%;text-align:left;font-size:13px;padding:6px 8px;border:1px solid var(--border2);border-radius:4px">
-        </div>
-        <div>
-          <div style="font-family:'IBM Plex Mono';font-size:9px;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px">MC Balance</div>
-          <input class="ci" type="number" value="${l.mcBal||0}" onchange="patch('${l.id}','mcBal',this.value)" style="width:100%;text-align:left;font-size:13px;padding:6px 8px;border:1px solid var(--border2);border-radius:4px">
-        </div>
-        <div>
-          <div style="font-family:'IBM Plex Mono';font-size:9px;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px">Day Prod</div>
-          <input class="ci" type="number" value="${l.dayProd||0}" onchange="patch('${l.id}','dayProd',this.value)" style="width:100%;text-align:left;font-size:13px;padding:6px 8px;border:1px solid var(--border2);border-radius:4px">
-        </div>
-        <div>
-          <div style="font-family:'IBM Plex Mono';font-size:9px;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px">Night Prod</div>
-          <input class="ci" type="number" value="${l.nightProd||0}" onchange="patch('${l.id}','nightProd',this.value)" style="width:100%;text-align:left;font-size:13px;padding:6px 8px;border:1px solid var(--border2);border-radius:4px">
-        </div>
-      </div>
-      <!-- calculated row -->
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding-top:8px;border-top:1px solid var(--border)">
-        <div style="text-align:center">
-          <div style="font-family:'IBM Plex Mono';font-size:9px;color:var(--text3);letter-spacing:.6px;text-transform:uppercase">DIFF</div>
-          <div class="text-mono ${diffCls}" style="font-size:13px;font-weight:500">${c.diff>0?'+':''}${fiI(c.diff)}</div>
-        </div>
-        <div style="text-align:center">
-          <div style="font-family:'IBM Plex Mono';font-size:9px;color:var(--text3);letter-spacing:.6px;text-transform:uppercase">Closing</div>
-          <div class="text-mono" style="font-size:13px;font-weight:600;color:var(--gold)">${fiI(c.closing)}</div>
-        </div>
-        <div style="text-align:center">
-          <div style="font-family:'IBM Plex Mono';font-size:9px;color:var(--text3);letter-spacing:.6px;text-transform:uppercase">WA KGS</div>
-          <div class="text-mono" style="font-size:12px;color:var(--gold)">${fi(c.waKgs)}</div>
-        </div>
-        <div style="text-align:center">
-          <div style="font-family:'IBM Plex Mono';font-size:9px;color:var(--text3);letter-spacing:.6px;text-transform:uppercase">W1 Cons</div>
-          <div class="text-mono" style="font-size:12px;color:var(--gold)">${c.w1Cons?fi(c.w1Cons,2):'—'}</div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-
   el.innerHTML = `
     ${rollInfo}
-    ${isMobile ? `
-      <div id="loom-cards">${mobileCards}</div>
-      <div style="padding:10px 0;text-align:center">
-        <button class="btn btn-outline btn-sm" onclick="document.getElementById('loom-table-view').style.display='block';this.style.display='none'">Show Full Table ▸</button>
-      </div>
-      <div id="loom-table-view" style="display:none">` : ''}
-    <div class="tbox">
+    <div class="tbox" style="-webkit-overflow-scrolling:touch">
       <table>
         <thead><tr>
           <th>M/C</th><th>Beam No</th><th>Type</th><th>Party</th><th>Quality</th><th>Warp</th><th>Panna</th>
@@ -1112,7 +1130,6 @@ function renderLooms() {
         </tr></tfoot>
       </table>
     </div>
-    ${isMobile ? '</div>' : ''}
     <div style="margin-top:10px;font-size:11px;color:var(--text3);font-family:'IBM Plex Mono'">
       DIFF = MC Balance − Opening Balance · Closing = MC Balance − Day − Night · B/F Days = MC Balance ÷ (Day+Night)
     </div>`;
@@ -1402,7 +1419,7 @@ function renderYarn() {
       </tr>`).join('');
 
     aggHtml = `
-      <div style="display:grid;grid-template-columns:3fr 2fr;gap:16px;margin-bottom:20px">
+      <div style="display:grid;grid-template-columns:3fr 2fr;gap:16px;margin-bottom:20px" class="weft-agg-grid">
         <div>
           <div class="sec-title mb8" style="font-size:17px">Weft Required — By Yarn</div>
           <div class="tbox">
@@ -1553,7 +1570,10 @@ function renderClients() {
   const el = document.getElementById('client-content');
   if (!clients.length) { el.innerHTML=`<div class="empty"><div class="empty-ico">◉</div><p>No clients yet. Add job work clients to assign them to machines.</p></div>`; return; }
   el.innerHTML = `<div class="cl-grid">${clients.map(c => {
-    const cLooms = looms.filter(l => l.client === c.id);
+    // JW clients match by client ID; Own clients match looms with workType=own
+    const cLooms = c.type==='jw'
+      ? looms.filter(l => l.client === c.id)
+      : looms.filter(l => l.workType !== 'jw');
     const cMeters = cLooms.reduce((s,l)=>s+Math.max(0,calcLoom(l).closing),0);
     const isJW = c.type==='jw';
     return `<div class="cl-card">
@@ -1802,6 +1822,12 @@ function openYarnModal(id) {
   if(id){
     const y=yarns.find(x=>x.id===id);if(!y)return;
     ['quality','party','opBal','purchase','issue','rate'].forEach(f=>{document.getElementById('ym-'+f).value=y[f]??'';});
+    // show previous closing balance as a hint
+    const prevClose = num(y.opBal)+num(y.purchase)-num(y.issue);
+    const closeEl = document.getElementById('ym-prev-closing');
+    const useBtnEl = document.getElementById('ym-useClosing');
+    if (closeEl) { closeEl.textContent = 'Prev closing: ' + prevClose.toFixed(3) + ' kg'; closeEl.style.display = 'block'; }
+    if (useBtnEl) useBtnEl.style.display = 'inline-flex';
     // restore TPM
     const hasTpm=!!(y.tpmS||y.tpmZ);
     document.getElementById('ym-tpm').checked=hasTpm;
@@ -1810,6 +1836,8 @@ function openYarnModal(id) {
   } else {
     ['ym-quality','ym-party','ym-opBal','ym-purchase','ym-issue','ym-rate'].forEach(f=>document.getElementById(f).value='');
     document.getElementById('ym-tpm').checked=false;
+    const _ce=document.getElementById('ym-prev-closing');if(_ce)_ce.style.display='none';
+    const _ue=document.getElementById('ym-useClosing');if(_ue)_ue.style.display='none';
     document.getElementById('ym-tpm-fields').style.display='none';
     document.getElementById('ym-tpmS').value='';document.getElementById('ym-tpmZ').value='';document.getElementById('ym-tpmTotal').value='';
   }
@@ -1817,6 +1845,38 @@ function openYarnModal(id) {
   document.getElementById('ym-party-list').innerHTML = clients.map(c=>'<option value="'+c.name+'">').join('');
   openModal('yarnModal');
 }
+function useClosingAsOpening() {
+  const id = document.getElementById('ym-id').value;
+  const y = yarns.find(x => x.id === id);
+  if (!y) return;
+  const closing = num(y.opBal) + num(y.purchase) - num(y.issue);
+  document.getElementById('ym-opBal').value = closing.toFixed(3);
+  document.getElementById('ym-purchase').value = 0;
+  document.getElementById('ym-issue').value = 0;
+  // update hint
+  const closeEl = document.getElementById('ym-prev-closing');
+  if (closeEl) closeEl.textContent = 'Opening set to ' + closing.toFixed(3) + ' kg — now enter new Issue / Purchase';
+}
+
+function rollYarnStock() {
+  if (!yarns.length) return;
+  const lines = yarns.map(y => {
+    const close = num(y.opBal)+num(y.purchase)-num(y.issue);
+    return y.quality + ': closing ' + close.toFixed(2) + ' kg → new opening';
+  }).join('\n');
+  if (!confirm('Roll Yarn Stock?\n\nThis will:\n• Set Opening Balance = current Closing Balance for all yarns\n• Reset Purchase and Issue to 0\n\n' + lines + '\n\nProceed?')) return;
+  yarns.forEach(y => {
+    const close = num(y.opBal)+num(y.purchase)-num(y.issue);
+    y.opBal    = Math.max(0, close);
+    y.purchase = 0;
+    y.tpmS     = 0;
+    y.tpmZ     = 0;
+    y.issue    = 0;
+  });
+  KK.s('yarns', yarns);
+  renderYarn();
+}
+
 function tpmToggle(){
   const on=document.getElementById('ym-tpm').checked;
   document.getElementById('ym-tpm-fields').style.display=on?'block':'none';
