@@ -128,9 +128,9 @@ html,body{
 }
 /* mobile: stack brand vertically */
 @media(max-width:540px){
-  .brand{flex-direction:column;align-items:flex-start;gap:1px}
-  .brand-k{font-size:19px;letter-spacing:3px}
-  .brand-s{font-size:8px;letter-spacing:1.2px}
+  .brand{flex-direction:column;align-items:flex-start;gap:0px}
+  .brand-k{font-size:18px;letter-spacing:3px}
+  .brand-s{font-size:7.5px;letter-spacing:1.5px;white-space:nowrap}
 }
 .hdr-r{display:flex;align-items:center;gap:6px}
 .date-pill{
@@ -463,7 +463,7 @@ td .panna-sel{
 }
 td .panna-sel:focus{outline:none;border-color:var(--gold);color:var(--text)}
 
-/* Weft agg grid mobile */
+/* Weft agg grid */
 .weft-agg-grid{display:grid;grid-template-columns:3fr 2fr;gap:16px;margin-bottom:20px}
 
 /* ═══════════════════════════════════════
@@ -472,7 +472,7 @@ td .panna-sel:focus{outline:none;border-color:var(--gold);color:var(--text)}
 @media(max-width:768px){
   .hdr{padding:0 14px;height:50px;gap:8px}
   .brand-k{font-size:20px;letter-spacing:3px}
-  .date-pill{font-size:9px;padding:3px 6px;letter-spacing:0} /* show compact on mobile */
+  .date-pill{display:none}
   #syncBadge{display:none !important}
   /* mobile header: hide restore, show backup + theme */
   #restoreBtn{display:none}
@@ -481,6 +481,7 @@ td .panna-sel:focus{outline:none;border-color:var(--gold);color:var(--text)}
   .c-val{font-size:20px}
   .c-val.sm{font-size:16px}
   .tbox{overflow-x:auto}
+  .panel{overflow-x:clip;touch-action:pan-y}
   table{font-size:11px}
   th,td{padding:7px 8px}
   .sec-hdr{gap:6px}
@@ -499,7 +500,7 @@ td .panna-sel:focus{outline:none;border-color:var(--gold);color:var(--text)}
   .form-grid{grid-template-columns:1fr !important}
   .rc-grid{grid-template-columns:1fr}
   .cl-grid{grid-template-columns:1fr}
-  .weft-agg-grid{grid-template-columns:1fr !important}
+  .weft-agg-grid{grid-template-columns:1fr}
   #dash-weft-grid{grid-template-columns:1fr !important}
 }
 @media(max-width:480px){
@@ -1617,7 +1618,7 @@ function renderYarn() {
       </tr>`).join('');
 
     aggHtml = `
-      <div style="display:grid;grid-template-columns:3fr 2fr;gap:16px;margin-bottom:20px" class="weft-agg-grid">
+      <div style="" class="weft-agg-grid">
         <div>
           <div class="sec-title mb8" style="font-size:17px">Weft Required — By Yarn</div>
           <div class="tbox">
