@@ -465,6 +465,8 @@ td .panna-sel:focus{outline:none;border-color:var(--gold);color:var(--text)}
 
 /* Weft agg grid */
 .weft-agg-grid{display:grid;grid-template-columns:3fr 2fr;gap:16px;margin-bottom:20px}
+.weft-agg-grid > *{min-width:0} /* prevent grid children bursting past 1fr */
+#dash-weft-grid > *{min-width:0}
 
 /* ═══════════════════════════════════════
    MOBILE
@@ -481,7 +483,7 @@ td .panna-sel:focus{outline:none;border-color:var(--gold);color:var(--text)}
   .c-val{font-size:20px}
   .c-val.sm{font-size:16px}
   .tbox{overflow-x:auto}
-  .panel{overflow-x:clip;touch-action:pan-y}
+  .panel{overflow-x:clip}
   table{font-size:11px}
   th,td{padding:7px 8px}
   .sec-hdr{gap:6px}
