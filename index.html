@@ -1611,13 +1611,36 @@ function renderYarn() {
         </tr>`;
       }).join('');
 
-    const pyRows = Object.values(partyYarnMap)
+    // Party × Yarn: cross-reference consumption with stock PER PARTY
+    const partyYarnRows = Object.values(partyYarnMap)
       .sort((a,b) => a.party.localeCompare(b.party) || b.total - a.total)
-      .map(r => `<tr>
-        <td>${r.party}</td>
-        <td><span class="badge b-dim" style="font-size:9px">${r.yarn}</span></td>
-        <td class="r gold strong">${fi(r.total, 2)}</td>
-      </tr>`).join('');
+      .map(r => {
+        const stockEntry = yarns.find(y =>
+          fuzzyMatch(r.yarn, y.quality) &&
+          y.party && r.party &&
+          y.party.toLowerCase().trim() === r.party.toLowerCase().trim()
+        );
+        const anyMatch = !stockEntry ? yarns.find(y => fuzzyMatch(r.yarn, y.quality)) : null;
+        const matched = stockEntry || anyMatch;
+        const stock = matched ? num(matched.opBal)+num(matched.purchase)-num(matched.issue) : null;
+        const deficit = stock !== null ? stock - r.total : null;
+        const isShort = deficit !== null && deficit < 0;
+        const defBadge = deficit === null
+          ? '<span class="badge b-dim">—</span>'
+          : isShort
+            ? '<span class="badge b-red">⚠ ' + fi(deficit,2) + '</span>'
+            : '<span class="badge b-green">+' + fi(deficit,2) + '</span>';
+        const stockLabel = stock !== null
+          ? '<span class="' + (isShort ? 'red' : 'gold') + '">' + fi(stock,2) + '</span>'
+          : '<span class="dim">—</span>';
+        return '<tr>'
+          + '<td>' + r.party + '</td>'
+          + '<td><span class="badge b-dim" style="font-size:9px">' + r.yarn + '</span></td>'
+          + '<td class="r gold strong">' + fi(r.total, 2) + '</td>'
+          + '<td class="r">' + stockLabel + '</td>'
+          + '<td>' + defBadge + '</td>'
+          + '</tr>';
+      }).join('');
 
     aggHtml = `
       <div style="" class="weft-agg-grid">
@@ -1636,11 +1659,16 @@ function renderYarn() {
           </div>
         </div>
         <div>
-          <div class="sec-title mb8" style="font-size:17px">Party × Yarn</div>
+          <div class="sec-title mb8" style="font-size:17px">Party × Yarn — Required vs Stock</div>
           <div class="tbox">
             <table>
-              <thead><tr><th>Party</th><th>Yarn</th><th class="r" style="color:var(--gold)">Cons. (kg)</th></tr></thead>
-              <tbody>${pyRows}</tbody>
+              <thead><tr>
+                <th>Party</th><th>Yarn</th>
+                <th class="r" style="color:var(--gold)">Required (kg)</th>
+                <th class="r">Stock (kg)</th>
+                <th>Surplus / Deficit</th>
+              </tr></thead>
+              <tbody>${partyYarnRows}</tbody>
             </table>
           </div>
         </div>
