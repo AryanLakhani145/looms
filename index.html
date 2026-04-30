@@ -1676,29 +1676,67 @@ function renderYarn() {
   }
 
   // ── STOCK VS DAILY RATE ──
-  const consMap = buildConsumptionMap();
+  // ── DAILY RATE VS STOCK — PARTY WISE ──
+  // Build party × yarn daily consumption from looms
+  const partyConsMap = {}; // "party||yarn" → { party, yarn, daily }
+  looms.forEach(l => {
+    const c = calcLoom(l);
+    const party = l.party || '—';
+    if (c.w1Yarn && c.w1Daily > 0) {
+      const k = party + '||' + c.w1Yarn;
+      partyConsMap[k] = partyConsMap[k] || { party, yarn: c.w1Yarn, daily: 0 };
+      partyConsMap[k].daily += c.w1Daily;
+    }
+    if (c.w2Yarn && c.w2Daily > 0) {
+      const k = party + '||' + c.w2Yarn;
+      partyConsMap[k] = partyConsMap[k] || { party, yarn: c.w2Yarn, daily: 0 };
+      partyConsMap[k].daily += c.w2Daily;
+    }
+  });
+
   let stockVsRateHtml = '';
-  if (Object.keys(consMap).length > 0) {
-    const rows = Object.entries(consMap).map(([yarn, data]) => {
-      const match = yarns.find(y => fuzzyMatch(yarn, y.quality));
-      const stock = match ? num(match.opBal)+num(match.purchase)-num(match.issue) : null;
-      const daysLeft = stock !== null && data.daily > 0 ? stock / data.daily : null;
-      const badge = daysLeft === null ? '<span class="badge b-dim">—</span>'
-        : daysLeft <= 10 ? `<span class="badge b-red">⚠ ${daysLeft.toFixed(1)}d</span>`
-        : daysLeft <= 20 ? `<span class="badge b-amber">${daysLeft.toFixed(1)}d</span>`
-        : `<span class="badge b-green">${daysLeft.toFixed(1)}d OK</span>`;
-      return `<tr>
-        <td class="text-mono">${yarn}</td>
-        <td class="r amber">${fi(data.daily,2)} kg/day</td>
-        <td class="r ${stock!==null?'gold':'dim'}">${stock!==null?fi(stock,2):'—'}</td>
-        <td>${badge}</td>
-      </tr>`;
-    }).join('');
+  if (Object.keys(partyConsMap).length > 0) {
+    const rows = Object.values(partyConsMap)
+      .sort((a,b) => a.party.localeCompare(b.party) || b.daily - a.daily)
+      .map(r => {
+        // Match stock by party first, then any
+        const stockEntry = yarns.find(y =>
+          fuzzyMatch(r.yarn, y.quality) &&
+          y.party && r.party &&
+          y.party.toLowerCase().trim() === r.party.toLowerCase().trim()
+        );
+        const anyMatch = !stockEntry ? yarns.find(y => fuzzyMatch(r.yarn, y.quality)) : null;
+        const matched = stockEntry || anyMatch;
+        const stock = matched ? num(matched.opBal)+num(matched.purchase)-num(matched.issue) : null;
+        const daysLeft = stock !== null && r.daily > 0 ? stock / r.daily : null;
+        const isShort = daysLeft !== null && daysLeft <= 10;
+        const badge = daysLeft === null
+          ? '<span class="badge b-dim">—</span>'
+          : daysLeft <= 10
+            ? '<span class="badge b-red">⚠ ' + daysLeft.toFixed(1) + 'd</span>'
+            : daysLeft <= 20
+              ? '<span class="badge b-amber">' + daysLeft.toFixed(1) + 'd</span>'
+              : '<span class="badge b-green">' + daysLeft.toFixed(1) + 'd OK</span>';
+        return '<tr'+ (isShort?' style="background:rgba(139,26,26,.05)"':'') +'>'
+          + '<td>' + r.party + '</td>'
+          + '<td><span class="badge b-dim" style="font-size:9px">' + r.yarn + '</span></td>'
+          + '<td class="r amber">' + fi(r.daily,2) + ' kg/day</td>'
+          + '<td class="r ' + (stock!==null?(isShort?'red':'gold'):'dim') + '">'
+            + (stock!==null ? fi(stock,2) : '—') + '</td>'
+          + '<td>' + badge + '</td>'
+          + '</tr>';
+      }).join('');
+
     stockVsRateHtml = `
-      <div class="sec-title mb8" style="font-size:17px">Daily Rate vs Stock</div>
+      <div class="sec-title mb8" style="font-size:17px">Daily Rate vs Stock — Party Wise</div>
       <div class="tbox mb20">
         <table>
-          <thead><tr><th>Yarn</th><th class="r">Daily Consumption</th><th class="r">Stock (kg)</th><th>Days Remaining</th></tr></thead>
+          <thead><tr>
+            <th>Party</th><th>Yarn</th>
+            <th class="r">Daily Rate</th>
+            <th class="r">Stock (kg)</th>
+            <th>Days Remaining</th>
+          </tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>`;
