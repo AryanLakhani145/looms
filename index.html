@@ -571,6 +571,7 @@ td .panna-sel:focus{outline:none;border-color:var(--gold);color:var(--text)}
           <option value="closing">Closing ↓</option>
         </select>
         <button class="btn btn-outline" onclick="openHistory()" style="font-size:10px">📋 History</button>
+        <button class="btn btn-outline" onclick="toggleQuickEntry()" id="quickEntryBtn" style="font-size:10px;border-color:var(--gold-dim);color:var(--gold)">⚡ Quick Entry</button>
         <button class="btn btn-amber" onclick="rollToNextDay()" title="Carry closing balance forward as opening balance and reset production">↺ Roll to Next Day</button>
         <button class="btn btn-gold" onclick="openLoomModal(null)">+ Add Machine</button>
       </div>
@@ -582,6 +583,32 @@ td .panna-sel:focus{outline:none;border-color:var(--gold);color:var(--text)}
       <button class="btn btn-gold" onclick="saveDayEntry()" style="font-size:11px;letter-spacing:.3px">✓ Save Entry</button>
       <span style="font-family:'IBM Plex Mono';font-size:10px;color:var(--text3)" id="loomDateLabel"></span>
       <span id="entrySaveStatus" style="font-family:'IBM Plex Mono';font-size:10px;display:none"></span>
+    </div>
+    <!-- Quick Entry Panel -->
+    <div id="quickEntryPanel" style="display:none;margin-bottom:14px">
+      <div style="background:var(--bg2);border:1px solid var(--gold-border);border-radius:9px;overflow:hidden;box-shadow:var(--shadow-sm)">
+        <div style="background:var(--gold-bg);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--gold-border)">
+          <div style="font-family:'IBM Plex Mono';font-size:10px;letter-spacing:1px;color:var(--gold)">⚡ QUICK ENTRY — Tab or Enter to move between fields</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-gold btn-sm" onclick="applyQuickEntry()">✓ Apply All</button>
+            <button class="btn btn-outline btn-sm" onclick="toggleQuickEntry()">✕ Close</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead><tr style="background:var(--thead)">
+              <th style="padding:8px 12px;font-family:'IBM Plex Mono';font-size:9px;letter-spacing:1px;color:var(--text3);font-weight:400;text-transform:uppercase;white-space:nowrap">M/C</th>
+              <th style="padding:8px 12px;font-family:'IBM Plex Mono';font-size:9px;letter-spacing:1px;color:var(--text3);font-weight:400;text-transform:uppercase;white-space:nowrap">Beam No</th>
+              <th style="padding:8px 12px;font-family:'IBM Plex Mono';font-size:9px;letter-spacing:1px;color:var(--text3);font-weight:400;text-transform:uppercase;white-space:nowrap">Quality</th>
+              <th style="padding:8px 12px;font-family:'IBM Plex Mono';font-size:9px;letter-spacing:1px;color:var(--text3);font-weight:400;text-transform:uppercase;text-align:right;white-space:nowrap">WA M/C Balance</th>
+              <th style="padding:8px 12px;font-family:'IBM Plex Mono';font-size:9px;letter-spacing:1px;color:var(--text3);font-weight:400;text-transform:uppercase;text-align:right;white-space:nowrap">Day Prod</th>
+              <th style="padding:8px 12px;font-family:'IBM Plex Mono';font-size:9px;letter-spacing:1px;color:var(--text3);font-weight:400;text-transform:uppercase;text-align:right;white-space:nowrap">Night Prod</th>
+              <th style="padding:8px 12px;font-family:'IBM Plex Mono';font-size:9px;letter-spacing:1px;color:var(--gold);font-weight:400;text-transform:uppercase;text-align:right;white-space:nowrap">Closing ✓</th>
+            </tr></thead>
+            <tbody id="quickEntryBody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
     <div id="loom-content"></div>
   </div>
@@ -1100,7 +1127,7 @@ function renderDash() {
       <div class="card gold"><div class="c-label">Machines Running</div><div class="c-val">${looms.length}</div><div class="c-sub">${looms.filter(l=>l.workType==='jw').length} job work · ${looms.filter(l=>l.workType!=='jw').length} own</div></div>
       <div class="card gold"><div class="c-label">Own Meters (closing)</div><div class="c-val sm">${fiI(ownM)}</div><div class="c-sub">own production</div></div>
       <div class="card red"><div class="c-label">Job Work Meters</div><div class="c-val sm">${fiI(jwM)}</div><div class="c-sub">client machines</div></div>
-      <div class="card plain"><div class="c-label">Today's Production</div><div class="c-val sm">${fiI(totProd*2)}</div><div class="c-sub">day + night</div></div>
+      <div class="card plain"><div class="c-label">Today's Production</div><div class="c-val sm">${fiI(totProd)}</div><div class="c-sub">day + night</div></div>
       <div class="card plain"><div class="c-label">Total Warp KGS</div><div class="c-val sm">${fi(totKgs,1)}</div><div class="c-sub">on loom</div></div>
       <div class="card ${bfRows.filter(l=>l.c.bfDays<=10&&l.c.bfDays>0).length>0?'red':'plain'}">
         <div class="c-label">Critical Beam Falls</div>
@@ -1568,9 +1595,9 @@ function renderYarn() {
     machHtml = `
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <div class="sec-title" style="font-size:17px">Weft Consumption — On Loom</div>
-        <button class="btn btn-outline btn-sm" onclick="toggleWeftCons(this)" style="font-family:'IBM Plex Mono';font-size:10px;min-width:80px">▲ Expand</button>
+        <button class="btn btn-outline btn-sm" onclick="toggleWeftCons(this)" style="font-family:'IBM Plex Mono';font-size:10px;min-width:80px">▲ Collapse</button>
       </div>
-      <div id="weft-cons-body" style="display:none">
+      <div id="weft-cons-body">
         <div class="alert alert-dim mb8">Total weft needed to weave out remaining beam balance. Formula: Closing Balance × Panna × W_Weight (g/m) / 100</div>
         <div class="tbox mb20">
           <table>
@@ -1815,6 +1842,7 @@ function renderBeams() {
       <td class="r">${fiC(c.amount)}</td>
       <td><div style="display:flex;gap:3px">
         <button class="btn btn-outline btn-sm btn-ico" onclick="openBeamModal('${b.id}')">✏</button>
+        <button class="btn btn-outline btn-sm btn-ico" onclick="dupeBeam('${b.id}')" title="Duplicate">⧉</button>
         <button class="btn btn-red btn-sm btn-ico" onclick="delBeam('${b.id}')">✕</button>
       </div></td>
     </tr>`;
@@ -1830,6 +1858,15 @@ function renderBeams() {
     <tbody>${rows}</tbody>
     <tfoot><tr><td colspan="7">Total — ${beams.length} beams</td><td class="r">${fiI(tM)}</td><td class="r">${fi(tK)}</td><td></td><td class="r">${fiC(tA)}</td><td></td></tr></tfoot>
   </table></div>`;
+}
+function dupeBeam(id) {
+  const b = beams.find(x => x.id === id);
+  if (!b) return;
+  const copy = { ...b, id: uid(), beamNo: b.beamNo + ' (copy)', meters: 0 };
+  beams.push(copy);
+  KK.s('beams', beams);
+  renderBeams();
+  openBeamModal(copy.id);
 }
 function delBeam(id) { if(!confirm('Remove?'))return; beams=beams.filter(b=>b.id!==id); KK.s('beams',beams); renderBeams(); }
 
@@ -1921,7 +1958,10 @@ function renderPipes() {
       <td class="r"><input class="ci" type="number" value="${p.e230||0}" onchange="patchPipe('${p.id}','e230',this.value)" style="width:70px"></td>
       <td class="r"><input class="ci" type="number" value="${p.e280||0}" onchange="patchPipe('${p.id}','e280',this.value)" style="width:70px"></td>
       <td class="r gold">${num(p.e230)+num(p.e280)}</td>
-      <td><button class="btn btn-red btn-sm btn-ico" onclick="delPipe('${p.id}')">✕</button></td>
+      <td><div style="display:flex;gap:3px">
+      <button class="btn btn-outline btn-sm btn-ico" onclick="openPipeModal('${p.id}')">✏</button>
+      <button class="btn btn-red btn-sm btn-ico" onclick="delPipe('${p.id}')">✕</button>
+    </div></td>
     </tr>`;
   }).join('');
   el.innerHTML = `
@@ -2308,6 +2348,136 @@ function toggleWeftCons(btn) {
   const collapsed = body.style.display === 'none';
   body.style.display = collapsed ? '' : 'none';
   btn.textContent = collapsed ? '▲ Collapse' : '▼ Expand';
+}
+
+// ══════════════════════════════════════════════
+//  QUICK ENTRY
+// ══════════════════════════════════════════════
+let _qeOpen = false;
+
+function toggleQuickEntry() {
+  _qeOpen = !_qeOpen;
+  const panel = document.getElementById("quickEntryPanel");
+  const btn   = document.getElementById("quickEntryBtn");
+  if (!panel) return;
+  if (_qeOpen) {
+    buildQuickEntry();
+    panel.style.display = "block";
+    btn.textContent = "⚡ Quick Entry ✓";
+    btn.style.background = "var(--gold-bg)";
+    // focus first input
+    setTimeout(() => {
+      const first = panel.querySelector("input[data-qe]");
+      if (first) first.focus();
+    }, 50);
+  } else {
+    panel.style.display = "none";
+    btn.textContent = "⚡ Quick Entry";
+    btn.style.background = "";
+  }
+}
+
+function buildQuickEntry() {
+  const body = document.getElementById("quickEntryBody");
+  if (!body) return;
+  // sort by machNo for logical paper-sheet order
+  const sorted = [...looms].sort((a,b) => (a.machNo||0)-(b.machNo||0));
+  body.innerHTML = sorted.map((l, rowIdx) => {
+    const c = calcLoom(l);
+    const baseIdx = rowIdx * 3; // 3 inputs per row: mcBal, dayProd, nightProd
+    return "<tr style=\"border-bottom:1px solid var(--border)\">" +
+      "<td style=\"padding:6px 12px;font-family:'IBM Plex Mono';font-size:12px;color:var(--text3)\">" + (l.machNo||"—") + "</td>" +
+      "<td style=\"padding:6px 12px;font-family:'IBM Plex Mono';font-size:11px;color:var(--text2)\">" + (l.beamNo||"—") + "</td>" +
+      "<td style=\"padding:6px 12px\">" +
+        "<span class=\"badge b-gold\" style=\"font-size:8px\">" + (l.quality||"—") + "</span>" +
+      "</td>" +
+      "<td style=\"padding:4px 8px;text-align:right\">" +
+        "<input data-qe data-id=\"" + l.id + "\" data-field=\"mcBal\" data-row=\"" + rowIdx + "\" data-col=\"0\"" +
+        " type=\"number\" value=\"" + (l.mcBal||0) + "\"" +
+        " style=\"width:90px;padding:5px 7px;border:1px solid var(--border2);border-radius:4px;font-family:'IBM Plex Mono';font-size:12px;background:var(--input);color:var(--text);text-align:right\"" +
+        " oninput=\"qePreview(this)\" onkeydown=\"qeKey(event,this)\">" +
+      "</td>" +
+      "<td style=\"padding:4px 8px;text-align:right\">" +
+        "<input data-qe data-id=\"" + l.id + "\" data-field=\"dayProd\" data-row=\"" + rowIdx + "\" data-col=\"1\"" +
+        " type=\"number\" value=\"" + (l.dayProd||0) + "\"" +
+        " style=\"width:80px;padding:5px 7px;border:1px solid var(--border2);border-radius:4px;font-family:'IBM Plex Mono';font-size:12px;background:var(--input);color:var(--text);text-align:right\"" +
+        " oninput=\"qePreview(this)\" onkeydown=\"qeKey(event,this)\">" +
+      "</td>" +
+      "<td style=\"padding:4px 8px;text-align:right\">" +
+        "<input data-qe data-id=\"" + l.id + "\" data-field=\"nightProd\" data-row=\"" + rowIdx + "\" data-col=\"2\"" +
+        " type=\"number\" value=\"" + (l.nightProd||0) + "\"" +
+        " style=\"width:80px;padding:5px 7px;border:1px solid var(--border2);border-radius:4px;font-family:'IBM Plex Mono';font-size:12px;background:var(--input);color:var(--text);text-align:right\"" +
+        " oninput=\"qePreview(this)\" onkeydown=\"qeKey(event,this)\">" +
+      "</td>" +
+      "<td style=\"padding:6px 12px;text-align:right\" id=\"qe-closing-" + l.id + "\">" +
+        "<span style=\"font-family:'IBM Plex Mono';font-size:12px;color:var(--gold);font-weight:500\">" + fiI(c.closing) + "</span>" +
+      "</td>" +
+    "</tr>";
+  }).join("");
+}
+
+function qeKey(e, input) {
+  const inputs = Array.from(document.querySelectorAll("[data-qe]"));
+  const idx = inputs.indexOf(input);
+  if (e.key === "Enter" || e.key === "Tab") {
+    e.preventDefault();
+    const next = e.shiftKey ? inputs[idx - 1] : inputs[idx + 1];
+    if (next) { next.focus(); next.select(); }
+  } else if (e.key === "ArrowDown") {
+    e.preventDefault();
+    // jump to same column, next row
+    const col = parseInt(input.dataset.col);
+    const row = parseInt(input.dataset.row);
+    const next = inputs.find(i => parseInt(i.dataset.row)===row+1 && parseInt(i.dataset.col)===col);
+    if (next) { next.focus(); next.select(); }
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault();
+    const col = parseInt(input.dataset.col);
+    const row = parseInt(input.dataset.row);
+    const prev = inputs.find(i => parseInt(i.dataset.row)===row-1 && parseInt(i.dataset.col)===col);
+    if (prev) { prev.focus(); prev.select(); }
+  }
+}
+
+function qePreview(input) {
+  // Live update closing balance preview for this row
+  const id = input.dataset.id;
+  const row = document.querySelector("[data-id=\""+id+"\"][data-field=\"mcBal\"]");
+  const day = document.querySelector("[data-id=\""+id+"\"][data-field=\"dayProd\"]");
+  const ngt = document.querySelector("[data-id=\""+id+"\"][data-field=\"nightProd\"]");
+  if (!row || !day || !ngt) return;
+  const mc  = parseFloat(row.value)||0;
+  const d   = parseFloat(day.value)||0;
+  const n   = parseFloat(ngt.value)||0;
+  const cl  = mc - d - n;
+  const el  = document.getElementById("qe-closing-"+id);
+  if (el) el.innerHTML = "<span style=\"font-family:'IBM Plex Mono';font-size:12px;color:" + (cl<0?"var(--red-bright)":"var(--gold)") + ";font-weight:500\">" + fiI(cl) + "</span>";
+}
+
+function applyQuickEntry() {
+  const inputs = document.querySelectorAll("[data-qe]");
+  let changed = 0;
+  inputs.forEach(input => {
+    const id    = input.dataset.id;
+    const field = input.dataset.field;
+    const val   = parseFloat(input.value) || 0;
+    const loom  = looms.find(l => l.id === id);
+    if (loom && loom[field] !== val) {
+      loom[field] = val;
+      changed++;
+    }
+  });
+  if (changed > 0) {
+    KK.s("looms", looms);
+    renderLooms();
+    // flash confirmation
+    const btn = document.querySelector("[onclick='applyQuickEntry()']");
+    if (btn) {
+      const orig = btn.textContent;
+      btn.textContent = "✓ Applied " + (changed/3|0) + " machines";
+      setTimeout(() => btn.textContent = orig, 2000);
+    }
+  }
 }
 
 // ══════════════════════════════════════════════
