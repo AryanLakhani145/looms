@@ -1100,7 +1100,7 @@ function renderDash() {
       <div class="card gold"><div class="c-label">Machines Running</div><div class="c-val">${looms.length}</div><div class="c-sub">${looms.filter(l=>l.workType==='jw').length} job work · ${looms.filter(l=>l.workType!=='jw').length} own</div></div>
       <div class="card gold"><div class="c-label">Own Meters (closing)</div><div class="c-val sm">${fiI(ownM)}</div><div class="c-sub">own production</div></div>
       <div class="card red"><div class="c-label">Job Work Meters</div><div class="c-val sm">${fiI(jwM)}</div><div class="c-sub">client machines</div></div>
-      <div class="card plain"><div class="c-label">Today's Production</div><div class="c-val sm">${fiI(totProd)}</div><div class="c-sub">day + night</div></div>
+      <div class="card plain"><div class="c-label">Today's Production</div><div class="c-val sm">${fiI(totProd*2)}</div><div class="c-sub">day + night</div></div>
       <div class="card plain"><div class="c-label">Total Warp KGS</div><div class="c-val sm">${fi(totKgs,1)}</div><div class="c-sub">on loom</div></div>
       <div class="card ${bfRows.filter(l=>l.c.bfDays<=10&&l.c.bfDays>0).length>0?'red':'plain'}">
         <div class="c-label">Critical Beam Falls</div>
