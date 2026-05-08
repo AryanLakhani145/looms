@@ -1164,20 +1164,29 @@ function renderDash() {
         </div>
       </div>
       <div>
-        <div class="sec-title mb8" style="font-size:17px">Client / Party Breakdown</div>
+<div class="sec-title mb8" style="font-size:17px">Client / Party Breakdown</div>
         <div class="tbox">
           <table>
-            <thead><tr><th>Client</th><th>Machines</th><th class="r">Running (m)</th></tr></thead>
+            <thead><tr><th>Client</th><th>Quality</th><th class="r">M/Cs</th><th class="r">Running (m)</th></tr></thead>
             <tbody>
               ${(() => {
                 const map = {};
                 looms.forEach(l => {
-                  const key = l.workType==='jw' ? (getClientName(l.client)||'JW') : 'Own Production';
-                  map[key] = map[key]||{count:0,meters:0};
+                  const client = l.workType==='jw' ? (getClientName(l.client)||'JW') : 'Own';
+                  const quality = l.quality || '—';
+                  const key = client + '||' + quality;
+                  map[key] = map[key] || { client, quality, count:0, meters:0 };
                   map[key].count++;
                   map[key].meters += Math.max(0, calcLoom(l).closing);
                 });
-                return Object.entries(map).map(([k,v])=>`<tr><td>${k}</td><td class="dim">${v.count}</td><td class="r gold">${fiI(v.meters)}</td></tr>`).join('') || '<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text3)">No looms</td></tr>';
+                return Object.values(map)
+                  .sort((a,b) => a.client.localeCompare(b.client) || b.count - a.count)
+                  .map(v => `<tr>
+                    <td class="dim">${v.client}</td>
+                    <td><span class="badge b-gold" style="font-size:8px">${v.quality}</span></td>
+                    <td class="r">${v.count} mc</td>
+                    <td class="r gold">${fiI(v.meters)}</td>
+                  </tr>`).join('') || '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3)">No looms</td></tr>';
               })()}
             </tbody>
           </table>
